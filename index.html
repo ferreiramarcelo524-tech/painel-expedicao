@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CD-84 EXPEDIÇÃO - PAINEL</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0a0a0a; color: white; margin: 0; padding: 5px; display: flex; flex-direction: column; align-items: center; }
+        h1 { text-transform: uppercase; border-bottom: 3px solid #0056b3; width: 100%; text-align: center; font-size: 1.2rem; margin: 5px 0; }
+        
+        .header-container { display: flex; align-items: center; gap: 15px; background-color: #151515; padding: 5px 15px; border-radius: 12px; border: 1px solid #333; margin-bottom: 8px; }
+        #val_faturamento { color: #2ecc71; font-weight: bold; font-size: 2.6rem; }
+
+        .table-container { background-color: #151515; padding: 5px; border-radius: 12px; border: 1px solid #333; width: fit-content; max-width: 99vw; height: 72vh; overflow-y: auto; }
+        table { border-collapse: collapse; width: auto; }
+        th { background-color: #0056b3; color: white; padding: 6px 10px; font-size: 0.65rem; text-transform: uppercase; border: 1px solid #333; position: sticky; top: 0; }
+        td { padding: 6px 10px; border-bottom: 1px solid #333; text-align: center; font-size: 1rem; font-weight: bold; white-space: nowrap; }
+        tr:nth-child(even) { background-color: #1d1d1d; }
+
+        .col-doca { background-color: #222; color: #f1c40f; font-size: 1.2rem; }
+        .col-placa { color: #3498db; font-size: 1.3rem; }
+        .col-valor { color: #2ecc71; }
+        .col-data { color: #aaa; font-size: 0.85rem; font-weight: normal; }
+    </style>
+</head>
+<body>
+
+    <h1>CD-84 EXPEDIÇÃO - CONTROLE DE PEDIDOS</h1>
+
+    <div class="header-container">
+        <div id="chart_div"></div>
+        <div style="text-align: center;">
+            <div id="val_faturamento">R$ 0,00</div>
+            <div style="color: #aaa; font-size: 0.75rem; text-transform: uppercase;">Faturamento Total</div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>TIPO</th>
+                    <th>FILIAL</th>
+                    <th>DOCA</th>
+                    <th>VALOR</th>
+                    <th>VEICULOS</th>
+                    <th>DATA</th>
+                    <th>VEZ</th>
+                    <th>PLACA</th>
+                    <th>CUBAGEM</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabela"></tbody>
+        </table>
+    </div>
+
+    <script type="text/javascript">
+        const URL_API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
+
+        google.charts.load('current', {'packages':['gauge']});
+        google.charts.setOnLoadCallback(inicializar);
+
+        var chart, dataChart, options;
+
+        function inicializar() {
+            dataChart = google.visualization.arrayToDataTable([['Label', 'Value'],['Meta %', 0]]);
+            options = { width: 240, height: 180, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
+            chart = new google.visualization.Gauge(document.getElementById('chart_div'));
+            chart.draw(dataChart, options);
+            atualizar();
+            setInterval(atualizar, 10000);
+        }
+
+        async function atualizar() {
+            try {
+                const response = await fetch(URL_API);
+                const json = await response.json();
+                document.getElementById('val_faturamento').innerText = json.faturamento;
+                let fatNum = parseFloat(json.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+                let perc = (fatNum / (json.meta || 1)) * 100;
+                dataChart.setValue(0, 1, Math.round(perc));
+                chart.draw(dataChart, options);
+
+                const tbody = document.getElementById('corpoTabela');
+                tbody.innerHTML = '';
+
+                json.veiculos.forEach(v => {
+                    const row = tbody.insertRow();
+                    let corTipo = v.tipo.includes("ABASTECIMENTO") ? "#f39c12" : v.tipo.includes("ELETRO") ? "#2ecc71" : "#dc3545";
+                    
+                    row.innerHTML = `
+                        <td style="color: ${corTipo}">${v.tipo}</td>
+                        <td>${v.filial}</td>
+                        <td class="col-doca">${v.doca}</td>
+                        <td class="col-valor">${v.valor}</td>
+                        <td>${v.veiculos}</td>
+                        <td class="col-data">${v.data}</td>
+                        <td>${v.vez}</td>
+                        <td class="col-placa">${v.placa}</td>
+                        <td>${v.cubagem}</td>
+                    `;
+                });
+            } catch (e) { console.error("Erro:", e); }
+        }
+    </script>
+</body>
+</html>
