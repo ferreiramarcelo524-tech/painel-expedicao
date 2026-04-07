@@ -2,32 +2,59 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>PAINEL CD-84</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAINEL CD-84 EXPEDIÇÃO</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; background: #000; color: #fff; display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { width: 160px; border-right: 1px solid #333; display: flex; flex-direction: column; align-items: center; padding: 10px; gap: 20px; background: #050505; }
-        .main { flex: 1; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #00428a; font-size: 10px; padding: 8px 2px; position: sticky; top: 0; text-transform: uppercase; }
-        td { border-bottom: 1px solid #222; padding: 6px 2px; text-align: center; font-size: 13px; font-weight: bold; }
-        tr:nth-child(even) { background: #0a0a0a; }
-        .col-placa { color: #3498db; font-size: 15px; }
-        .col-doca { color: #f1c40f; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Lateral */
+        .sidebar { width: 170px; border-right: 1px solid #333; display: flex; flex-direction: column; align-items: center; padding: 15px 5px; gap: 20px; background: #050505; }
+        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+        #fat_txt { color: #2ecc71; font-size: 1.1rem; font-weight: bold; text-align: center; }
+        
+        /* Principal */
+        .main { flex: 1; overflow-y: auto; background: #000; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        
+        th { 
+            background: #00428a; color: #fff; font-size: 9px; padding: 8px 2px; 
+            position: sticky; top: 0; text-transform: uppercase; border-bottom: 1px solid #333;
+        }
+        
+        td { 
+            border-bottom: 1px solid #1a1a1a; padding: 5px 2px; text-align: center; 
+            font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        
+        tr:nth-child(even) { background: #080808; }
+        .col-placa { color: #3498db; font-size: 14px; }
+        .col-doca { color: #f1c40f; font-size: 13px; }
+        .col-valor { color: #2ecc71; font-size: 11px; }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <h2 style="font-size: 12px; color: #666;">CD-84</h2>
+        <h2>CD-84 MATEUS</h2>
         <div id="chart_div"></div>
-        <div id="fat_txt" style="color: #2ecc71; font-size: 18px; font-weight: bold;">R$ 0,00</div>
+        <div id="fat_txt">R$ 0,00</div>
+        <p style="font-size: 8px; color: #444;">FATURAMENTO ATUAL</p>
     </div>
+
     <div class="main">
         <table>
             <thead>
                 <tr>
-                    <th>TIPO</th><th>FIL</th><th>DOCA</th><th>VALOR</th><th>VEIC</th><th>DATA</th><th>VEZ</th><th>PLACA</th><th>CUB</th>
+                    <th style="width: 14%">TIPO</th>
+                    <th style="width: 8%">FIL</th>
+                    <th style="width: 8%">DOCA</th>
+                    <th style="width: 12%">VALOR</th>
+                    <th style="width: 10%">VEIC</th>
+                    <th style="width: 12%">DATA</th>
+                    <th style="width: 6%">VEZ</th>
+                    <th style="width: 18%">PLACA</th>
+                    <th style="width: 12%">CUB</th>
                 </tr>
             </thead>
             <tbody id="tabelaBody"></tbody>
@@ -35,42 +62,71 @@
     </div>
 
     <script>
-        // COLE O LINK DA NOVA IMPLANTAÇÃO ABAIXO
-        const LINK_API = "COLE_AQUI_O_LINK_QUE_TERMINA_EM_EXEC";
+        // O seu link já está inserido corretamente aqui
+        const LINK_API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
 
         google.charts.load('current', {'packages':['gauge']});
-        google.charts.setOnLoadCallback(() => {
-            const chart = new google.visualization.Gauge(document.getElementById('chart_div'));
-            const data = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
-            const options = { width: 140, height: 140, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100 };
+        google.charts.setOnLoadCallback(iniciar);
 
-            async function carregar() {
-                try {
-                    const res = await fetch(LINK_API);
-                    const json = await res.json();
-                    
-                    // Faturamento e Gráfico
-                    document.getElementById('fat_txt').innerText = json.faturamento;
-                    let num = parseFloat(json.faturamento.replace(/[R$.]/g, '').replace(',', '.')) || 0;
-                    let perc = Math.round((num / json.meta) * 100);
-                    data.setValue(0, 1, perc > 100 ? 100 : perc);
-                    chart.draw(data, options);
+        let chart, dataChart, options;
 
-                    // Tabela
-                    const body = document.getElementById('tabelaBody');
-                    body.innerHTML = "";
+        function iniciar() {
+            chart = new google.visualization.Gauge(document.getElementById('chart_div'));
+            dataChart = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
+            options = { width: 140, height: 140, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
+            
+            atualizar();
+            setInterval(atualizar, 15000); // Atualiza a cada 15 segundos
+        }
+
+        async function atualizar() {
+            try {
+                // Adicionado 'follow' para evitar erro de redirecionamento do Google
+                const res = await fetch(LINK_API, { method: 'GET', redirect: 'follow' });
+                const json = await res.json();
+                
+                // Atualiza Texto Faturamento
+                document.getElementById('fat_txt').innerText = json.faturamento;
+
+                // Atualiza Velocímetro
+                let num = parseFloat(json.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+                let meta = json.meta || 950000;
+                let perc = Math.round((num / meta) * 100);
+                dataChart.setValue(0, 1, perc > 100 ? 100 : perc);
+                chart.draw(dataChart, options);
+
+                // Atualiza Tabela
+                const body = document.getElementById('tabelaBody');
+                body.innerHTML = "";
+                
+                if (json.veiculos && json.veiculos.length > 0) {
                     json.veiculos.forEach(v => {
                         const row = body.insertRow();
-                        let cor = v.tipo.includes("ABASTECIMENTO") ? "#f39c12" : v.tipo.includes("ELETRO") ? "#2ecc71" : "#dc3545";
-                        if(!v.tipo) cor = "#fff";
-                        row.innerHTML = `<td style="color:${cor}">${v.tipo}</td><td>${v.filial}</td><td class="col-doca">${v.doca}</td><td>${v.valor}</td><td>${v.veiculos}</td><td style="color:#666; font-size:11px">${v.data}</td><td>${v.vez}</td><td class="col-placa">${v.placa}</td><td>${v.cubagem}</td>`;
-                    });
-                } catch (e) { console.error("Erro:", e); }
-            }
+                        
+                        // Cor do Tipo
+                        let cor = "#fff";
+                        let t = v.tipo.toUpperCase();
+                        if(t.includes("ABASTECIMENTO")) cor = "#f39c12";
+                        else if(t.includes("ELETRO")) cor = "#2ecc71";
+                        else if(t !== "") cor = "#dc3545";
 
-            carregar();
-            setInterval(carregar, 15000);
-        });
+                        row.innerHTML = `
+                            <td style="color:${cor}">${v.tipo}</td>
+                            <td>${v.filial}</td>
+                            <td class="col-doca">${v.doca}</td>
+                            <td class="col-valor">${v.valor}</td>
+                            <td>${v.veiculos}</td>
+                            <td style="color:#666; font-size:10px">${v.data}</td>
+                            <td>${v.vez}</td>
+                            <td class="col-placa">${v.placa}</td>
+                            <td>${v.cubagem}</td>
+                        `;
+                    });
+                }
+            } catch (e) {
+                console.error("Erro na atualização:", e);
+            }
+        }
     </script>
 </body>
 </html>
