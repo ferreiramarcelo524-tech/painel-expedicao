@@ -3,59 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CD-84 EXPEDIÇÃO - PAINEL</title>
+    <title>CD-84 EXPEDIÇÃO - PAINEL VERTICAL</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0a0a0a; color: white; margin: 0; padding: 5px; display: flex; flex-direction: column; align-items: center; }
-        h1 { text-transform: uppercase; border-bottom: 3px solid #0056b3; width: 100%; text-align: center; font-size: 1.2rem; margin: 5px 0; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background-color: #0a0a0a; 
+            color: white; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+
+        /* Barra Lateral */
+        .sidebar { 
+            width: 220px; 
+            background-color: #151515; 
+            border-right: 2px solid #0056b3; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding-top: 20px; 
+            gap: 20px; 
+        }
+
+        .sidebar h2 { font-size: 0.9rem; color: #aaa; text-align: center; margin: 0; text-transform: uppercase; }
+
+        #val_faturamento { color: #2ecc71; font-weight: bold; font-size: 1.6rem; text-align: center; }
+
+        /* Área da Tabela */
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 5px; }
+
+        h1 { text-transform: uppercase; font-size: 1.1rem; margin: 0 0 5px 0; color: #0056b3; padding-left: 10px; }
+
+        .table-container { 
+            flex: 1; 
+            background-color: #111; 
+            border-radius: 8px; 
+            border: 1px solid #333; 
+            overflow-y: auto; 
+        }
+
+        table { border-collapse: collapse; width: 100%; }
+        th { 
+            background-color: #0056b3; 
+            color: white; 
+            padding: 8px 4px; 
+            font-size: 0.65rem; 
+            text-transform: uppercase; 
+            position: sticky; 
+            top: 0; 
+            z-index: 10; 
+        }
+        td { 
+            padding: 6px 4px; 
+            border-bottom: 1px solid #222; 
+            text-align: center; 
+            font-size: 0.95rem; 
+            font-weight: bold; 
+            white-space: nowrap; 
+        }
+        tr:nth-child(even) { background-color: #161616; }
+
+        /* Estilização de colunas */
+        .col-doca { color: #f1c40f; }
+        .col-placa { color: #3498db; font-size: 1.1rem; border-left: 1px solid #333; }
+        .col-valor { color: #2ecc71; font-size: 0.85rem; }
         
-        .header-container { display: flex; align-items: center; gap: 15px; background-color: #151515; padding: 5px 15px; border-radius: 12px; border: 1px solid #333; margin-bottom: 8px; }
-        #val_faturamento { color: #2ecc71; font-weight: bold; font-size: 2.6rem; }
-
-        .table-container { background-color: #151515; padding: 5px; border-radius: 12px; border: 1px solid #333; width: fit-content; max-width: 99vw; height: 72vh; overflow-y: auto; }
-        table { border-collapse: collapse; width: auto; }
-        th { background-color: #0056b3; color: white; padding: 6px 10px; font-size: 0.65rem; text-transform: uppercase; border: 1px solid #333; position: sticky; top: 0; }
-        td { padding: 6px 10px; border-bottom: 1px solid #333; text-align: center; font-size: 1rem; font-weight: bold; white-space: nowrap; }
-        tr:nth-child(even) { background-color: #1d1d1d; }
-
-        .col-doca { background-color: #222; color: #f1c40f; font-size: 1.2rem; }
-        .col-placa { color: #3498db; font-size: 1.3rem; }
-        .col-valor { color: #2ecc71; }
-        .col-data { color: #aaa; font-size: 0.85rem; font-weight: normal; }
+        .table-container::-webkit-scrollbar { width: 6px; }
+        .table-container::-webkit-scrollbar-thumb { background: #0056b3; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>CD-84 EXPEDIÇÃO - CONTROLE DE PEDIDOS</h1>
-
-    <div class="header-container">
+    <div class="sidebar">
+        <h2>CD-84<br>EXPEDIÇÃO</h2>
         <div id="chart_div"></div>
-        <div style="text-align: center;">
+        <div>
             <div id="val_faturamento">R$ 0,00</div>
-            <div style="color: #aaa; font-size: 0.75rem; text-transform: uppercase;">Faturamento Total</div>
+            <div style="color: #777; font-size: 0.65rem; text-align: center; text-transform: uppercase;">Faturamento Atual</div>
+        </div>
+        <div style="margin-top: auto; padding-bottom: 20px; font-size: 0.6rem; color: #444;">Atualização: 10s</div>
+    </div>
+
+    <div class="main-content">
+        <h1>Controle de Pedidos CD-84</h1>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>TIPO</th>
+                        <th>FILIAL</th>
+                        <th>DOCA</th>
+                        <th>VALOR</th>
+                        <th>VEIC</th>
+                        <th>DATA</th>
+                        <th>VEZ</th>
+                        <th>PLACA</th>
+                        <th>CUBAGEM</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela"></tbody>
+            </table>
         </div>
     </div>
 
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>TIPO</th>
-                    <th>FILIAL</th>
-                    <th>DOCA</th>
-                    <th>VALOR</th>
-                    <th>VEICULOS</th>
-                    <th>DATA</th>
-                    <th>VEZ</th>
-                    <th>PLACA</th>
-                    <th>CUBAGEM</th>
-                </tr>
-            </thead>
-            <tbody id="corpoTabela"></tbody>
-        </table>
-    </div>
-
     <script type="text/javascript">
+        // ATENÇÃO: COLOQUE SEU NOVO LINK DE IMPLANTAÇÃO ABAIXO
         const URL_API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
 
         google.charts.load('current', {'packages':['gauge']});
@@ -65,7 +122,7 @@
 
         function inicializar() {
             dataChart = google.visualization.arrayToDataTable([['Label', 'Value'],['Meta %', 0]]);
-            options = { width: 240, height: 180, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
+            options = { width: 180, height: 180, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
             chart = new google.visualization.Gauge(document.getElementById('chart_div'));
             chart.draw(dataChart, options);
             atualizar();
@@ -74,8 +131,9 @@
 
         async function atualizar() {
             try {
-                const response = await fetch(URL_API);
+                const response = await fetch(URL_API, { redirect: 'follow' });
                 const json = await response.json();
+                
                 document.getElementById('val_faturamento').innerText = json.faturamento;
                 let fatNum = parseFloat(json.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
                 let perc = (fatNum / (json.meta || 1)) * 100;
@@ -87,21 +145,24 @@
 
                 json.veiculos.forEach(v => {
                     const row = tbody.insertRow();
-                    let corTipo = v.tipo.includes("ABASTECIMENTO") ? "#f39c12" : v.tipo.includes("ELETRO") ? "#2ecc71" : "#dc3545";
-                    
+                    let corTipo = "#ffffff";
+                    if(v.tipo.includes("ABASTECIMENTO")) corTipo = "#f39c12";
+                    else if(v.tipo.includes("ELETRO")) corTipo = "#2ecc71";
+                    else if(v.tipo !== "") corTipo = "#dc3545";
+
                     row.innerHTML = `
                         <td style="color: ${corTipo}">${v.tipo}</td>
                         <td>${v.filial}</td>
                         <td class="col-doca">${v.doca}</td>
                         <td class="col-valor">${v.valor}</td>
                         <td>${v.veiculos}</td>
-                        <td class="col-data">${v.data}</td>
+                        <td style="color:#aaa; font-weight:normal; font-size:0.75rem">${v.data}</td>
                         <td>${v.vez}</td>
                         <td class="col-placa">${v.placa}</td>
                         <td>${v.cubagem}</td>
                     `;
                 });
-            } catch (e) { console.error("Erro:", e); }
+            } catch (e) { console.error("Erro ao carregar dados:", e); }
         }
     </script>
 </body>
