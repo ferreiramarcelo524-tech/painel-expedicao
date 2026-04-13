@@ -9,80 +9,51 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Lateral */
+        /* Sidebar com a largura original do primeiro código */
         .sidebar { 
             width: 170px; 
             border-right: 1px solid #333; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 15px 0; 
-            background: #050505;
-            flex-shrink: 0;
+            padding: 10px 5px; 
+            gap: 10px; 
+            background: #050505; 
         }
 
-        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; text-align: center; }
+        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        
+        #fat_txt, #fat_mes_txt { font-weight: bold; text-align: center; }
+        #fat_txt { color: #2ecc71; font-size: 1.1rem; }
+        #fat_mes_txt { color: #3498db; font-size: 0.9rem; }
 
-        /* Container do Gráfico e Textos */
-        .gauge-block {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            margin-bottom: 25px; /* Espaço entre os blocos */
-        }
-
-        /* Div onde o Google desenha o gráfico */
-        .chart-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            /* O padding-bottom garante que o círculo não encoste no texto abaixo */
-            padding-bottom: 5px; 
-        }
-
+        .gauge-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        
+        /* Ajuste específico para o texto não ficar embaixo do contador */
         .label-gauge { 
-            font-size: 9px; 
-            color: #666; 
+            font-size: 8px; 
+            color: #444; 
             text-transform: uppercase; 
-            margin-top: 0px; 
-            margin-bottom: 10px;
-            text-align: center;
-            width: 100%;
-        }
-
-        #fat_txt, #fat_mes_txt { 
-            font-weight: bold; 
-            text-align: center; 
-            width: 100%;
-            display: block;
-            padding: 0 5px;
+            margin-top: -2px; /* Ajustado para dar distância do círculo */
+            margin-bottom: 10px; 
         }
         
-        #fat_txt { color: #2ecc71; font-size: 1.1rem; }
-        #fat_mes_txt { color: #3498db; font-size: 0.95rem; }
-
-        hr { width: 60%; border: 0; border-top: 1px solid #222; margin: 10px 0 20px 0; }
-
-        /* Principal - Tabela */
+        /* Principal */
         .main { flex: 1; overflow-y: auto; background: #000; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         
         th { 
             background: #00428a; color: #fff; font-size: 9px; padding: 8px 2px; 
             position: sticky; top: 0; text-transform: uppercase; border-bottom: 1px solid #333;
-            z-index: 10;
         }
         
         td { 
-            border-bottom: 1px solid #1a1a1a; padding: 6px 2px; text-align: center; 
+            border-bottom: 1px solid #1a1a1a; padding: 5px 2px; text-align: center; 
             font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         
         tr:nth-child(even) { background: #080808; }
-        .col-patio { color: #3498db; font-size: 14px; }
+        .col-patio{ color: #3498db; font-size: 14px; }
         .col-doca { color: #f1c40f; font-size: 13px; }
         .col-valor { color: #2ecc71; font-size: 11px; }
     </style>
@@ -91,16 +62,16 @@
     <div class="sidebar">
         <h2>CD-84 MATEUS</h2>
         
-        <div class="gauge-block">
-            <div id="chart_diario" class="chart-container" style="height: 140px;"></div>
+        <div class="gauge-container">
+            <div id="chart_diario"></div>
             <p class="label-gauge">Meta Diária</p>
             <div id="fat_txt">R$ 0,00</div>
         </div>
 
-        <hr>
+        <hr style="width: 80%; border: 0; border-top: 1px solid #222; margin: 10px 0;">
 
-        <div class="gauge-block">
-            <div id="chart_mensal" class="chart-container" style="height: 105px;"></div>
+        <div class="gauge-container">
+            <div id="chart_mensal" style="height: 110px; display: flex; align-items: center; justify-content: center;"></div>
             <p class="label-gauge">Meta Mensal (21M)</p>
             <div id="fat_mes_txt">R$ 0,00</div>
         </div>
@@ -148,9 +119,9 @@
             setInterval(atualizar, 15000); 
         }
 
-        function limparValor(texto) {
-            if (!texto) return 0;
-            return parseFloat(texto.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+        function converterParaNumero(valorTexto) {
+            if (!valorTexto) return 0;
+            return parseFloat(valorTexto.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
         }
 
         async function atualizar() {
@@ -158,9 +129,50 @@
                 const res = await fetch(LINK_API, { method: 'GET', redirect: 'follow' });
                 const json = await res.json();
                 
-                // 1. Faturamento Diário
-                document.getElementById('fat_txt').innerText = json.faturamento || "R$ 0,00";
-                let vDiario = limparValor(json.faturamento);
-                let metaD = json.meta || 950000;
-                let pDiario = Math.round((vDiario / metaD) * 100);
-                dataDi
+                document.getElementById('fat_txt').innerText = json.faturamento;
+                let vDiario = converterParaNumero(json.faturamento);
+                let metaDiaria = json.meta || 950000;
+                let percDiario = Math.round((vDiario / metaDiaria) * 100);
+                dataDiario.setValue(0, 1, percDiario > 100 ? 100 : percDiario);
+                chartDiario.draw(dataDiario, optDiario);
+
+                if(json.faturamentoMes) {
+                    document.getElementById('fat_mes_txt').innerText = json.faturamentoMes;
+                    let vMensal = converterParaNumero(json.faturamentoMes);
+                    let metaMensal = 21000000;
+                    let percMensal = Math.round((vMensal / metaMensal) * 100);
+                    dataMensal.setValue(0, 1, percMensal > 100 ? 100 : percMensal);
+                    chartMensal.draw(dataMensal, optMensal);
+                }
+
+                const body = document.getElementById('tabelaBody');
+                body.innerHTML = "";
+                if (json.veiculos && json.veiculos.length > 0) {
+                    json.veiculos.forEach(v => {
+                        const row = body.insertRow();
+                        let cor = "#fff";
+                        let t = v.tipo.toUpperCase();
+                        if(t.includes("ABASTECIMENTO")) cor = "#f39c12";
+                        else if(t.includes("ELETRO")) cor = "#2ecc71";
+                        else if(t !== "") cor = "#dc3545";
+
+                        row.innerHTML = `
+                            <td style="color:${cor}">${v.tipo}</td>
+                            <td>${v.filial}</td>
+                            <td class="col-doca">${v.doca}</td>
+                            <td class="col-valor">${v.valor}</td>
+                            <td>${v.veiculos}</td>
+                            <td style="color:#666; font-size:10px">${v.data}</td>
+                            <td>${v.vez}</td>
+                            <td class="col-patio">${v.patio}</td>
+                            <td>${v.cubagem}</td>
+                        `;
+                    });
+                }
+            } catch (e) {
+                console.error("Erro na atualização:", e);
+            }
+        }
+    </script>
+</body>
+</html>
