@@ -38,13 +38,17 @@
             align-items: center;
         }
 
+        /* LEGENDA DOS CONTADORES: Aumentada conforme solicitado */
         .label-gauge { 
-            font-size: 8px; 
-            color: #444; 
+            font-size: 13px; /* Aumentado de 11px para 13px */
+            font-weight: 800; /* Extra negrito */
+            color: #ccc; /* Cinza claro para melhor contraste */
             text-transform: uppercase; 
             text-align: center;
-            margin-top: -5px;
-            margin-bottom: 5px;
+            margin-top: -10px; /* Aproxima um pouco mais do gráfico */
+            margin-bottom: 8px;
+            letter-spacing: 0.8px;
+            width: 90%;
         }
         
         #fat_txt, #fat_mes_txt { font-weight: bold; text-align: center; width: 100%; }
@@ -70,7 +74,7 @@
         
         <div class="gauge-wrapper">
             <div class="chart-box" id="chart_diario" style="height: 140px;"></div>
-            <p class="label-gauge">Faturamento Atual</p>
+            <p class="label-gauge">FATURAMENTO ATUAL</p>
             <div id="fat_txt">R$ 0,00</div>
         </div>
 
@@ -78,7 +82,7 @@
 
         <div class="gauge-wrapper">
             <div class="chart-box" id="chart_mensal" style="height: 140px;"></div>
-            <p class="label-gauge">Faturamento Mês (21M)</p>
+            <p class="label-gauge">FATURAMENTO MÊS (21M)</p>
             <div id="fat_mes_txt">R$ 0,00</div>
         </div>
     </div>
@@ -134,7 +138,6 @@
                 const response = await fetch(LINK_API);
                 const dados = await response.json();
                 
-                // Atualiza Gráfico Diário
                 if(dados.faturamento) {
                     document.getElementById('fat_txt').innerText = dados.faturamento;
                     let numD = converterParaNumero(dados.faturamento);
@@ -143,7 +146,6 @@
                     chartD.draw(dataD, opt);
                 }
 
-                // Atualiza Gráfico Mensal
                 if(dados.faturamentoMes) {
                     document.getElementById('fat_mes_txt').innerText = dados.faturamentoMes;
                     let numM = converterParaNumero(dados.faturamentoMes);
@@ -152,7 +154,6 @@
                     chartM.draw(dataM, opt);
                 }
 
-                // Atualiza Tabela
                 const tabelaBody = document.getElementById('tabelaBody');
                 if (dados.veiculos && Array.isArray(dados.veiculos)) {
                     let conteudoHtml = "";
