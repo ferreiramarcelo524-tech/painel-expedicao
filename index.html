@@ -22,21 +22,21 @@
         
         .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
 
-        /* Container fixo para garantir que tudo fique no mesmo eixo */
         .gauge-wrapper {
-            position: relative;
-            width: 170px;
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 20px;
+            justify-content: center;
+            margin-bottom: 15px;
         }
 
-        /* Força os SVGs do Google a ficarem centralizados */
-        #chart_diario, #chart_mensal {
+        /* Centralização forçada para os gráficos */
+        .chart-box {
+            width: 170px; /* Largura total da sidebar */
             display: flex;
             justify-content: center;
-            width: 170px;
+            align-items: center;
         }
 
         .label-gauge { 
@@ -54,7 +54,6 @@
 
         hr { width: 60%; border: 0; border-top: 1px solid #222; margin: 15px 0; }
 
-        /* Principal */
         .main { flex: 1; overflow-y: auto; background: #000; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         th { background: #00428a; color: #fff; font-size: 9px; padding: 10px 2px; position: sticky; top: 0; text-transform: uppercase; border-bottom: 1px solid #333; z-index: 10; }
@@ -70,7 +69,7 @@
         <h2>CD-84 MATEUS</h2>
         
         <div class="gauge-wrapper">
-            <div id="chart_diario" style="height: 140px;"></div>
+            <div class="chart-box" id="chart_diario" style="height: 140px;"></div>
             <p class="label-gauge">Faturamento Atual</p>
             <div id="fat_txt">R$ 0,00</div>
         </div>
@@ -78,7 +77,7 @@
         <hr>
 
         <div class="gauge-wrapper">
-            <div id="chart_mensal" style="height: 105px;"></div>
+            <div class="chart-box" id="chart_mensal" style="height: 125px;"></div>
             <p class="label-gauge">Faturamento Mês (21M)</p>
             <div id="fat_mes_txt">R$ 0,00</div>
         </div>
@@ -118,8 +117,8 @@
 
             chartM = new google.visualization.Gauge(document.getElementById('chart_mensal'));
             dataM = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
-            // Reduzi levemente a largura interna para garantir que o Google centralize no eixo
-            optM = { width: 100, height: 100, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
+            // Aumentado de 100 para 125 para centralizar com o de cima
+            optM = { width: 125, height: 125, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
             
             atualizar();
             setInterval(atualizar, 15000); 
@@ -153,7 +152,7 @@
                     j.veiculos.forEach(v => {
                         const row = b.insertRow();
                         let c = "#fff";
-                        let t = v.tipo.toUpperCase();
+                        let t = (v.tipo || "").toUpperCase();
                         if(t.includes("ABASTECIMENTO")) c = "#f39c12";
                         else if(t.includes("ELETRO")) c = "#2ecc71";
                         else if(t !== "") c = "#dc3545";
