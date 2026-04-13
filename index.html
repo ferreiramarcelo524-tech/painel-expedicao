@@ -10,13 +10,15 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; display: flex; height: 100vh; overflow: hidden; }
         
         /* Lateral */
-        .sidebar { width: 170px; border-right: 1px solid #333; display: flex; flex-direction: column; align-items: center; padding: 15px 5px; gap: 15px; background: #050505; }
-        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; }
-        #fat_txt { color: #2ecc71; font-size: 1.1rem; font-weight: bold; text-align: center; }
+        .sidebar { width: 170px; border-right: 1px solid #333; display: flex; flex-direction: column; align-items: center; padding: 10px 5px; gap: 10px; background: #050505; }
+        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
         
-        /* Novo estilo para o Faturamento do Mês (Célula I2) */
-        .fat-mes-container { border-top: 1px solid #222; padding-top: 10px; width: 100%; text-align: center; }
-        #fat_mes_txt { color: #3498db; font-size: 1rem; font-weight: bold; }
+        #fat_txt, #fat_mes_txt { font-weight: bold; text-align: center; }
+        #fat_txt { color: #2ecc71; font-size: 1.1rem; }
+        #fat_mes_txt { color: #3498db; font-size: 0.9rem; }
+
+        .gauge-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .label-gauge { font-size: 8px; color: #444; text-transform: uppercase; margin-top: -10px; margin-bottom: 10px; }
         
         /* Principal */
         .main { flex: 1; overflow-y: auto; background: #000; }
@@ -41,14 +43,19 @@
 <body>
     <div class="sidebar">
         <h2>CD-84 MATEUS</h2>
-        <div id="chart_div"></div>
         
-        <div id="fat_txt">R$ 0,00</div>
-        <p style="font-size: 8px; color: #444; margin-bottom: 5px;">FATURAMENTO ATUAL</p>
+        <div class="gauge-container">
+            <div id="chart_diario"></div>
+            <p class="label-gauge">Meta Diária</p>
+            <div id="fat_txt">R$ 0,00</div>
+        </div>
 
-        <div class="fat-mes-container">
+        <hr style="width: 80%; border: 0; border-top: 1px solid #222; margin: 10px 0;">
+
+        <div class="gauge-container">
+            <div id="chart_mensal"></div>
+            <p class="label-gauge">Meta Mensal (21M)</p>
             <div id="fat_mes_txt">R$ 0,00</div>
-            <p style="font-size: 8px; color: #444;">FATURAMENTO MÊS (I2)</p>
         </div>
     </div>
 
@@ -77,15 +84,28 @@
         google.charts.load('current', {'packages':['gauge']});
         google.charts.setOnLoadCallback(iniciar);
 
-        let chart, dataChart, options;
+        let chartDiario, chartMensal;
+        let dataDiario, dataMensal;
+        let optDiario, optMensal;
 
         function iniciar() {
-            chart = new google.visualization.Gauge(document.getElementById('chart_div'));
-            dataChart = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
-            options = { width: 140, height: 140, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
+            // Configuração Gráfico Diário
+            chartDiario = new google.visualization.Gauge(document.getElementById('chart_diario'));
+            dataDiario = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
+            optDiario = { width: 140, height: 140, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
+
+            // Configuração Gráfico Mensal (Menor)
+            chartMensal = new google.visualization.Gauge(document.getElementById('chart_mensal'));
+            dataMensal = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
+            optMensal = { width: 100, height: 100, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
             
             atualizar();
             setInterval(atualizar, 15000); 
+        }
+
+        function converterParaNumero(valorTexto) {
+            if (!valorTexto) return 0;
+            return parseFloat(valorTexto.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
         }
 
         async function atualizar() {
@@ -93,26 +113,27 @@
                 const res = await fetch(LINK_API, { method: 'GET', redirect: 'follow' });
                 const json = await res.json();
                 
-                // 1. Atualiza Faturamento Atual
+                // 1. Atualizar Diário (Célula E2)
                 document.getElementById('fat_txt').innerText = json.faturamento;
+                let vDiario = converterParaNumero(json.faturamento);
+                let metaDiaria = json.meta || 950000;
+                let percDiario = Math.round((vDiario / metaDiaria) * 100);
+                dataDiario.setValue(0, 1, percDiario > 100 ? 100 : percDiario);
+                chartDiario.draw(dataDiario, optDiario);
 
-                // 2. Atualiza Faturamento Mês (Célula I2)
-                // Nota: O seu script do Google Apps Script precisa retornar a propriedade 'faturamentoMes'
+                // 2. Atualizar Mensal (Célula I2)
                 if(json.faturamentoMes) {
                     document.getElementById('fat_mes_txt').innerText = json.faturamentoMes;
+                    let vMensal = converterParaNumero(json.faturamentoMes);
+                    let metaMensal = 21000000; // Meta fixa de 21 Milhões
+                    let percMensal = Math.round((vMensal / metaMensal) * 100);
+                    dataMensal.setValue(0, 1, percMensal > 100 ? 100 : percMensal);
+                    chartMensal.draw(dataMensal, optMensal);
                 }
 
-                // 3. Atualiza Velocímetro
-                let num = parseFloat(json.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
-                let meta = json.meta || 950000;
-                let perc = Math.round((num / meta) * 100);
-                dataChart.setValue(0, 1, perc > 100 ? 100 : perc);
-                chart.draw(dataChart, options);
-
-                // 4. Atualiza Tabela
+                // 3. Atualizar Tabela
                 const body = document.getElementById('tabelaBody');
                 body.innerHTML = "";
-                
                 if (json.veiculos && json.veiculos.length > 0) {
                     json.veiculos.forEach(v => {
                         const row = body.insertRow();
