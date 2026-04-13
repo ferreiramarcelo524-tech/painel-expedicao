@@ -9,19 +9,9 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Sidebar com a largura original do primeiro código */
-        .sidebar { 
-            width: 170px; 
-            border-right: 1px solid #333; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 10px 5px; 
-            gap: 10px; 
-            background: #050505; 
-        }
-
-        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        /* Lateral - Mantida com 170px conforme original */
+        .sidebar { width: 170px; border-right: 1px solid #333; display: flex; flex-direction: column; align-items: center; padding: 15px 5px; gap: 20px; background: #050505; }
+        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; }
         
         #fat_txt, #fat_mes_txt { font-weight: bold; text-align: center; }
         #fat_txt { color: #2ecc71; font-size: 1.1rem; }
@@ -29,13 +19,13 @@
 
         .gauge-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
         
-        /* Ajuste específico para o texto não ficar embaixo do contador */
+        /* Ajuste de legenda para não ser sobreposta */
         .label-gauge { 
             font-size: 8px; 
             color: #444; 
             text-transform: uppercase; 
-            margin-top: -2px; /* Ajustado para dar distância do círculo */
-            margin-bottom: 10px; 
+            margin-top: -2px; 
+            margin-bottom: 5px; 
         }
         
         /* Principal */
@@ -64,15 +54,15 @@
         
         <div class="gauge-container">
             <div id="chart_diario"></div>
-            <p class="label-gauge">Meta Diária</p>
+            <p class="label-gauge">FATURAMENTO ATUAL</p>
             <div id="fat_txt">R$ 0,00</div>
         </div>
 
-        <hr style="width: 80%; border: 0; border-top: 1px solid #222; margin: 10px 0;">
+        <hr style="width: 80%; border: 0; border-top: 1px solid #222;">
 
         <div class="gauge-container">
             <div id="chart_mensal" style="height: 110px; display: flex; align-items: center; justify-content: center;"></div>
-            <p class="label-gauge">Meta Mensal (21M)</p>
+            <p class="label-gauge">FATURAMENTO MÊS (21M)</p>
             <div id="fat_mes_txt">R$ 0,00</div>
         </div>
     </div>
@@ -107,10 +97,12 @@
         let optDiario, optMensal;
 
         function iniciar() {
+            // Config Diário
             chartDiario = new google.visualization.Gauge(document.getElementById('chart_diario'));
             dataDiario = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
             optDiario = { width: 140, height: 140, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
 
+            // Config Mensal (Menor como solicitado)
             chartMensal = new google.visualization.Gauge(document.getElementById('chart_mensal'));
             dataMensal = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
             optMensal = { width: 100, height: 100, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
@@ -119,9 +111,9 @@
             setInterval(atualizar, 15000); 
         }
 
-        function converterParaNumero(valorTexto) {
-            if (!valorTexto) return 0;
-            return parseFloat(valorTexto.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+        function limparMoeda(texto) {
+            if (!texto) return 0;
+            return parseFloat(texto.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
         }
 
         async function atualizar() {
@@ -129,19 +121,21 @@
                 const res = await fetch(LINK_API, { method: 'GET', redirect: 'follow' });
                 const json = await res.json();
                 
+                // Update Diário
                 document.getElementById('fat_txt').innerText = json.faturamento;
-                let vDiario = converterParaNumero(json.faturamento);
-                let metaDiaria = json.meta || 950000;
-                let percDiario = Math.round((vDiario / metaDiaria) * 100);
-                dataDiario.setValue(0, 1, percDiario > 100 ? 100 : percDiario);
+                let vD = limparMoeda(json.faturamento);
+                let metaD = json.meta || 950000;
+                let pD = Math.round((vD / metaD) * 100);
+                dataDiario.setValue(0, 1, pD > 100 ? 100 : pD);
                 chartDiario.draw(dataDiario, optDiario);
 
+                // Update Mensal
                 if(json.faturamentoMes) {
                     document.getElementById('fat_mes_txt').innerText = json.faturamentoMes;
-                    let vMensal = converterParaNumero(json.faturamentoMes);
-                    let metaMensal = 21000000;
-                    let percMensal = Math.round((vMensal / metaMensal) * 100);
-                    dataMensal.setValue(0, 1, percMensal > 100 ? 100 : percMensal);
+                    let vM = limparMoeda(json.faturamentoMes);
+                    let metaM = 21000000;
+                    let pM = Math.round((vM / metaM) * 100);
+                    dataMensal.setValue(0, 1, pM > 100 ? 100 : pM);
                     chartMensal.draw(dataMensal, optMensal);
                 }
 
@@ -170,7 +164,7 @@
                     });
                 }
             } catch (e) {
-                console.error("Erro na atualização:", e);
+                console.error("Erro:", e);
             }
         }
     </script>
