@@ -9,43 +9,46 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Lateral - Sidebar Centralizada */
+        /* Lateral */
         .sidebar { 
             width: 170px; 
             border-right: 1px solid #333; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 20px 0; 
+            padding: 15px 0; 
             background: #050505;
             flex-shrink: 0;
         }
 
-        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; text-align: center; }
+        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; text-align: center; }
 
+        /* Container do Gráfico e Textos */
         .gauge-block {
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
+            justify-content: flex-start;
+            margin-bottom: 25px; /* Espaço entre os blocos */
         }
 
-        /* Força a centralização do SVG do Google Charts */
-        #chart_diario, #chart_mensal {
+        /* Div onde o Google desenha o gráfico */
+        .chart-container {
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%;
+            /* O padding-bottom garante que o círculo não encoste no texto abaixo */
+            padding-bottom: 5px; 
         }
 
         .label-gauge { 
             font-size: 9px; 
             color: #666; 
             text-transform: uppercase; 
-            margin-top: -8px;
-            margin-bottom: 8px;
+            margin-top: 0px; 
+            margin-bottom: 10px;
             text-align: center;
             width: 100%;
         }
@@ -61,7 +64,7 @@
         #fat_txt { color: #2ecc71; font-size: 1.1rem; }
         #fat_mes_txt { color: #3498db; font-size: 0.95rem; }
 
-        hr { width: 60%; border: 0; border-top: 1px solid #222; margin: 15px 0 25px 0; }
+        hr { width: 60%; border: 0; border-top: 1px solid #222; margin: 10px 0 20px 0; }
 
         /* Principal - Tabela */
         .main { flex: 1; overflow-y: auto; background: #000; }
@@ -89,7 +92,7 @@
         <h2>CD-84 MATEUS</h2>
         
         <div class="gauge-block">
-            <div id="chart_diario" style="height: 140px;"></div>
+            <div id="chart_diario" class="chart-container" style="height: 140px;"></div>
             <p class="label-gauge">Meta Diária</p>
             <div id="fat_txt">R$ 0,00</div>
         </div>
@@ -97,7 +100,7 @@
         <hr>
 
         <div class="gauge-block">
-            <div id="chart_mensal" style="height: 100px;"></div>
+            <div id="chart_mensal" class="chart-container" style="height: 105px;"></div>
             <p class="label-gauge">Meta Mensal (21M)</p>
             <div id="fat_mes_txt">R$ 0,00</div>
         </div>
@@ -155,16 +158,9 @@
                 const res = await fetch(LINK_API, { method: 'GET', redirect: 'follow' });
                 const json = await res.json();
                 
-                // Atualizar Faturamento Diário
+                // 1. Faturamento Diário
                 document.getElementById('fat_txt').innerText = json.faturamento || "R$ 0,00";
                 let vDiario = limparValor(json.faturamento);
                 let metaD = json.meta || 950000;
                 let pDiario = Math.round((vDiario / metaD) * 100);
-                dataDiario.setValue(0, 1, pDiario > 100 ? 100 : pDiario);
-                chartDiario.draw(dataDiario, optDiario);
-
-                // Atualizar Faturamento Mensal (Célula I2)
-                if(json.faturamentoMes) {
-                    document.getElementById('fat_mes_txt').innerText = json.faturamentoMes;
-                    let vMensal = limparValor(json.faturamentoMes);
-                    let metaM = 21000000; // Meta de 21 Mil
+                dataDi
