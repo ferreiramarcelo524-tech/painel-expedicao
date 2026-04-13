@@ -28,12 +28,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
-        /* Centralização forçada para os gráficos */
+        /* Centralização forçada: ambos com 170px de largura */
         .chart-box {
-            width: 170px; /* Largura total da sidebar */
+            width: 170px; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -77,7 +77,7 @@
         <hr>
 
         <div class="gauge-wrapper">
-            <div class="chart-box" id="chart_mensal" style="height: 125px;"></div>
+            <div class="chart-box" id="chart_mensal" style="height: 140px;"></div>
             <p class="label-gauge">Faturamento Mês (21M)</p>
             <div id="fat_mes_txt">R$ 0,00</div>
         </div>
@@ -103,75 +103,4 @@
     </div>
 
     <script>
-        const LINK_API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
-
-        google.charts.load('current', {'packages':['gauge']});
-        google.charts.setOnLoadCallback(iniciar);
-
-        let chartD, chartM, dataD, dataM, optD, optM;
-
-        function iniciar() {
-            chartD = new google.visualization.Gauge(document.getElementById('chart_diario'));
-            dataD = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
-            optD = { width: 140, height: 140, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
-
-            chartM = new google.visualization.Gauge(document.getElementById('chart_mensal'));
-            dataM = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
-            // Aumentado de 100 para 125 para centralizar com o de cima
-            optM = { width: 125, height: 125, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
-            
-            atualizar();
-            setInterval(atualizar, 15000); 
-        }
-
-        function n(v) {
-            if (!v) return 0;
-            return parseFloat(v.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
-        }
-
-        async function atualizar() {
-            try {
-                const r = await fetch(LINK_API);
-                const j = await r.json();
-                
-                document.getElementById('fat_txt').innerText = j.faturamento;
-                let pD = Math.round((n(j.faturamento) / (j.meta || 950000)) * 100);
-                dataD.setValue(0, 1, pD > 100 ? 100 : pD);
-                chartD.draw(dataD, optD);
-
-                if(j.faturamentoMes) {
-                    document.getElementById('fat_mes_txt').innerText = j.faturamentoMes;
-                    let pM = Math.round((n(j.faturamentoMes) / 21000000) * 100);
-                    dataM.setValue(0, 1, pM > 100 ? 100 : pM);
-                    chartM.draw(dataM, optM);
-                }
-
-                const b = document.getElementById('tabelaBody');
-                b.innerHTML = "";
-                if (j.veiculos) {
-                    j.veiculos.forEach(v => {
-                        const row = b.insertRow();
-                        let c = "#fff";
-                        let t = (v.tipo || "").toUpperCase();
-                        if(t.includes("ABASTECIMENTO")) c = "#f39c12";
-                        else if(t.includes("ELETRO")) c = "#2ecc71";
-                        else if(t !== "") c = "#dc3545";
-
-                        row.innerHTML = `
-                            <td style="color:${c}">${v.tipo}</td>
-                            <td>${v.filial}</td>
-                            <td class="col-doca">${v.doca}</td>
-                            <td class="col-valor">${v.valor}</td>
-                            <td>${v.veiculos}</td>
-                            <td style="color:#666; font-size:10px">${v.data}</td>
-                            <td>${v.vez}</td>
-                            <td class="col-patio">${v.patio}</td>
-                            <td>${v.cubagem}</td>
-                        `;
-                    });
-                }
-            } catch (e) { console.error(e); }
-        }
-    </script>
-</body>
-</html>
+        const LINK_API = "
