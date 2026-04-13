@@ -1,81 +1,92 @@
 <style>
-    /* ... (mantenha o restante do estilo igual) ... */
-
-    /* Ajuste na Lateral para Centralização Total */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; display: flex; height: 100vh; overflow: hidden; }
+    
+    /* Lateral Ajustada */
     .sidebar { 
         width: 170px; 
         border-right: 1px solid #333; 
         display: flex; 
         flex-direction: column; 
         align-items: center; 
-        justify-content: flex-start; /* Alinha os itens do topo para baixo */
-        padding: 20px 0; 
-        gap: 0; /* Vamos controlar o espaço manualmente para precisão */
-        background: #050505; 
+        padding: 15px 0; 
+        background: #050505;
+        overflow: hidden;
     }
 
-    .gauge-container { 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        justify-content: center;
-        width: 100%; 
-        margin-bottom: 25px; /* Espaço entre os blocos */
+    .sidebar h2 { 
+        font-size: 10px; 
+        color: #555; 
+        text-transform: uppercase; 
+        letter-spacing: 1px; 
+        margin-bottom: 15px; 
     }
 
-    .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
-    
-    #fat_txt, #fat_mes_txt { 
+    /* Container dos Gráficos */
+    .gauge-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         width: 100%;
-        font-weight: bold; 
-        text-align: center; 
-        display: block;
-        margin-top: 5px;
+        min-height: 180px; /* Garante espaço para o gráfico aparecer */
     }
+
+    /* Ajuste para o gráfico menor */
+    .gauge-block-small {
+        min-height: 140px;
+    }
+
+    .label-gauge { 
+        font-size: 9px; 
+        color: #666; 
+        text-transform: uppercase; 
+        margin-top: -10px; /* Puxa o texto para perto do círculo */
+        margin-bottom: 5px;
+    }
+
+    #fat_txt, #fat_mes_txt { 
+        font-weight: bold; 
+        text-align: center;
+        width: 100%;
+        padding: 0 5px;
+    }
+    
     #fat_txt { color: #2ecc71; font-size: 1.1rem; }
     #fat_mes_txt { color: #3498db; font-size: 0.95rem; }
 
-    .label-gauge { 
-        font-size: 8px; 
-        color: #444; 
-        text-transform: uppercase; 
-        margin-top: -5px; 
-        text-align: center;
+    hr { 
+        width: 60%; 
+        border: 0; 
+        border-top: 1px solid #222; 
+        margin: 15px 0; 
     }
 
-    hr { width: 70%; border: 0; border-top: 1px solid #222; margin-bottom: 25px; }
-
-    /* ... (mantenha o restante da tabela igual) ... */
+    /* Restante da Tabela */
+    .main { flex: 1; overflow-y: auto; background: #000; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th { background: #00428a; color: #fff; font-size: 9px; padding: 8px 2px; position: sticky; top: 0; text-transform: uppercase; border-bottom: 1px solid #333; }
+    td { border-bottom: 1px solid #1a1a1a; padding: 5px 2px; text-align: center; font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    tr:nth-child(even) { background: #080808; }
+    .col-patio{ color: #3498db; font-size: 14px; }
+    .col-doca { color: #f1c40f; font-size: 13px; }
+    .col-valor { color: #2ecc71; font-size: 11px; }
 </style>
 
 <body>
     <div class="sidebar">
         <h2>CD-84 MATEUS</h2>
         
-        <div class="gauge-container">
-            <div id="chart_diario"></div>
+        <div class="gauge-block">
+            <div id="chart_diario" style="width: 140px; height: 140px;"></div>
             <p class="label-gauge">Meta Diária</p>
             <div id="fat_txt">R$ 0,00</div>
         </div>
 
         <hr>
 
-        <div class="gauge-container">
-            <div id="chart_mensal"></div>
+        <div class="gauge-block gauge-block-small">
+            <div id="chart_mensal" style="width: 100px; height: 100px;"></div>
             <p class="label-gauge">Meta Mensal (21M)</p>
             <div id="fat_mes_txt">R$ 0,00</div>
         </div>
     </div>
-    ```
-
-### O que foi corrigido:
-
-* **`align-items: center`:** Garante que o gráfico e o texto fiquem no eixo central da barra preta.
-* **`width: 100%` nos textos:** Evita que o valor do faturamento "corra" para o lado quando o número fica muito grande.
-* **`margin-top` negativo nos labels:** Aproxima o texto "Meta Diária/Mensal" do gráfico, eliminando aquele buraco vazio que aparecia no seu **pedido**.
-* **Distribuição de espaço:** Adicionei um `margin-bottom` fixo em cada bloco para que eles não fiquem colados um no outro.
-
-### Dica para o Gráfico Mensal:
-No seu código JavaScript, certifique-se de que o `optMensal` mantém o `width: 100` e `height: 100` para que ele continue sendo o "irmão menor" do principal, mantendo a hierarquia visual. 
-
-Ao aplicar isso, os dois círculos ficarão alinhados exatamente um abaixo do outro, com os valores em reais centralizados logo abaixo de cada um.
