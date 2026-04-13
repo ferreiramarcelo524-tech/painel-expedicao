@@ -1,77 +1,70 @@
-<style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; display: flex; height: 100vh; overflow: hidden; }
-    
-    /* Lateral Ajustada */
-    .sidebar { 
-        width: 170px; 
-        border-right: 1px solid #333; 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        padding: 15px 0; 
-        background: #050505;
-        overflow: hidden;
-    }
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAINEL CD-84 EXPEDIÇÃO</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Lateral */
+        .sidebar { 
+            width: 170px; 
+            border-right: 1px solid #333; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 15px 0; 
+            background: #050505;
+        }
 
-    .sidebar h2 { 
-        font-size: 10px; 
-        color: #555; 
-        text-transform: uppercase; 
-        letter-spacing: 1px; 
-        margin-bottom: 15px; 
-    }
+        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
 
-    /* Container dos Gráficos */
-    .gauge-block {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        min-height: 180px; /* Garante espaço para o gráfico aparecer */
-    }
+        .gauge-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
 
-    /* Ajuste para o gráfico menor */
-    .gauge-block-small {
-        min-height: 140px;
-    }
+        .label-gauge { 
+            font-size: 9px; 
+            color: #666; 
+            text-transform: uppercase; 
+            margin-top: -10px;
+            margin-bottom: 5px;
+        }
 
-    .label-gauge { 
-        font-size: 9px; 
-        color: #666; 
-        text-transform: uppercase; 
-        margin-top: -10px; /* Puxa o texto para perto do círculo */
-        margin-bottom: 5px;
-    }
+        #fat_txt, #fat_mes_txt { font-weight: bold; text-align: center; width: 100%; }
+        #fat_txt { color: #2ecc71; font-size: 1.1rem; }
+        #fat_mes_txt { color: #3498db; font-size: 0.95rem; }
 
-    #fat_txt, #fat_mes_txt { 
-        font-weight: bold; 
-        text-align: center;
-        width: 100%;
-        padding: 0 5px;
-    }
-    
-    #fat_txt { color: #2ecc71; font-size: 1.1rem; }
-    #fat_mes_txt { color: #3498db; font-size: 0.95rem; }
+        hr { width: 60%; border: 0; border-top: 1px solid #222; margin-bottom: 20px; }
 
-    hr { 
-        width: 60%; 
-        border: 0; 
-        border-top: 1px solid #222; 
-        margin: 15px 0; 
-    }
-
-    /* Restante da Tabela */
-    .main { flex: 1; overflow-y: auto; background: #000; }
-    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    th { background: #00428a; color: #fff; font-size: 9px; padding: 8px 2px; position: sticky; top: 0; text-transform: uppercase; border-bottom: 1px solid #333; }
-    td { border-bottom: 1px solid #1a1a1a; padding: 5px 2px; text-align: center; font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    tr:nth-child(even) { background: #080808; }
-    .col-patio{ color: #3498db; font-size: 14px; }
-    .col-doca { color: #f1c40f; font-size: 13px; }
-    .col-valor { color: #2ecc71; font-size: 11px; }
-</style>
-
+        /* Principal */
+        .main { flex: 1; overflow-y: auto; background: #000; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        
+        th { 
+            background: #00428a; color: #fff; font-size: 9px; padding: 8px 2px; 
+            position: sticky; top: 0; text-transform: uppercase; border-bottom: 1px solid #333;
+            z-index: 10;
+        }
+        
+        td { 
+            border-bottom: 1px solid #1a1a1a; padding: 5px 2px; text-align: center; 
+            font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        
+        tr:nth-child(even) { background: #080808; }
+        .col-patio { color: #3498db; font-size: 14px; }
+        .col-doca { color: #f1c40f; font-size: 13px; }
+        .col-valor { color: #2ecc71; font-size: 11px; }
+    </style>
+</head>
 <body>
     <div class="sidebar">
         <h2>CD-84 MATEUS</h2>
@@ -84,9 +77,113 @@
 
         <hr>
 
-        <div class="gauge-block gauge-block-small">
+        <div class="gauge-block">
             <div id="chart_mensal" style="width: 100px; height: 100px;"></div>
             <p class="label-gauge">Meta Mensal (21M)</p>
             <div id="fat_mes_txt">R$ 0,00</div>
         </div>
     </div>
+
+    <div class="main">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 14%">TIPO</th>
+                    <th style="width: 8%">FIL</th>
+                    <th style="width: 8%">DOCA</th>
+                    <th style="width: 12%">VALOR</th>
+                    <th style="width: 10%">VEIC</th>
+                    <th style="width: 12%">DATA</th>
+                    <th style="width: 6%">VEZ</th>
+                    <th style="width: 18%">PATIO</th>
+                    <th style="width: 12%">CUB</th>
+                </tr>
+            </thead>
+            <tbody id="tabelaBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const LINK_API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
+
+        google.charts.load('current', {'packages':['gauge']});
+        google.charts.setOnLoadCallback(iniciar);
+
+        let chartDiario, chartMensal;
+        let dataDiario, dataMensal;
+        let optDiario, optMensal;
+
+        function iniciar() {
+            chartDiario = new google.visualization.Gauge(document.getElementById('chart_diario'));
+            dataDiario = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
+            optDiario = { width: 140, height: 140, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
+
+            chartMensal = new google.visualization.Gauge(document.getElementById('chart_mensal'));
+            dataMensal = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
+            optMensal = { width: 100, height: 100, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
+            
+            atualizar();
+            setInterval(atualizar, 15000); 
+        }
+
+        function limparValor(texto) {
+            if (!texto) return 0;
+            return parseFloat(texto.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+        }
+
+        async function atualizar() {
+            try {
+                const res = await fetch(LINK_API, { method: 'GET', redirect: 'follow' });
+                const json = await res.json();
+                
+                // 1. Atualizar Faturamento Diário
+                document.getElementById('fat_txt').innerText = json.faturamento || "R$ 0,00";
+                let vDiario = limparValor(json.faturamento);
+                let metaD = json.meta || 950000;
+                let pDiario = Math.round((vDiario / metaD) * 100);
+                dataDiario.setValue(0, 1, pDiario > 100 ? 100 : pDiario);
+                chartDiario.draw(dataDiario, optDiario);
+
+                // 2. Atualizar Faturamento Mensal (Célula I2)
+                if(json.faturamentoMes) {
+                    document.getElementById('fat_mes_txt').innerText = json.faturamentoMes;
+                    let vMensal = limparValor(json.faturamentoMes);
+                    let metaM = 21000000; 
+                    let pMensal = Math.round((vMensal / metaM) * 100);
+                    dataMensal.setValue(0, 1, pMensal > 100 ? 100 : pMensal);
+                    chartMensal.draw(dataMensal, optMensal);
+                }
+
+                // 3. Atualizar Tabela
+                const body = document.getElementById('tabelaBody');
+                body.innerHTML = "";
+                
+                if (json.veiculos && json.veiculos.length > 0) {
+                    json.veiculos.forEach(v => {
+                        const row = body.insertRow();
+                        let cor = "#fff";
+                        let t = (v.tipo || "").toUpperCase();
+                        if(t.includes("ABASTECIMENTO")) cor = "#f39c12";
+                        else if(t.includes("ELETRO")) cor = "#2ecc71";
+                        else if(t !== "") cor = "#dc3545";
+
+                        row.innerHTML = `
+                            <td style="color:${cor}">${v.tipo || ""}</td>
+                            <td>${v.filial || ""}</td>
+                            <td class="col-doca">${v.doca || ""}</td>
+                            <td class="col-valor">${v.valor || ""}</td>
+                            <td>${v.veiculos || ""}</td>
+                            <td style="color:#666; font-size:10px">${v.data || ""}</td>
+                            <td>${v.vez || ""}</td>
+                            <td class="col-patio">${v.patio || ""}</td>
+                            <td>${v.cubagem || ""}</td>
+                        `;
+                    });
+                }
+            } catch (e) {
+                console.error("Erro na atualização:", e);
+            }
+        }
+    </script>
+</body>
+</html>
