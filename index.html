@@ -9,54 +9,50 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Lateral - Mantida com 170px e centralização flexível */
         .sidebar { 
             width: 170px; 
             border-right: 1px solid #333; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: center; /* Centraliza verticalmente na TV */
-            padding: 15px 0; 
+            padding: 20px 0; 
             background: #050505;
+            flex-shrink: 0;
         }
         
-        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 30px; }
-        
-        #fat_txt, #fat_mes_txt { font-weight: bold; text-align: center; width: 100%; display: block; }
-        #fat_txt { color: #2ecc71; font-size: 1.1rem; }
-        #fat_mes_txt { color: #3498db; font-size: 0.9rem; }
+        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
 
-        /* Contêiner de cada bloco do contador */
-        .gauge-block {
+        /* Container fixo para garantir que tudo fique no mesmo eixo */
+        .gauge-wrapper {
+            position: relative;
+            width: 170px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            width: 100%;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
-        /* Div onde o Google Charts desenha o círculo */
-        .chart-div {
+        /* Força os SVGs do Google a ficarem centralizados */
+        #chart_diario, #chart_mensal {
             display: flex;
             justify-content: center;
-            align-items: center;
-            width: 100%; /* Ocupa toda a largura da sidebar para centralizar */
+            width: 170px;
         }
 
-        /* Ajuste de legenda para não ser sobreposta */
         .label-gauge { 
             font-size: 8px; 
             color: #444; 
             text-transform: uppercase; 
-            margin-top: 2px; 
-            margin-bottom: 5px; 
             text-align: center;
-            width: 100%;
+            margin-top: -5px;
+            margin-bottom: 5px;
         }
         
-        hr { width: 70%; border: 0; border-top: 1px solid #222; margin-bottom: 25px; }
+        #fat_txt, #fat_mes_txt { font-weight: bold; text-align: center; width: 100%; }
+        #fat_txt { color: #2ecc71; font-size: 1.1rem; }
+        #fat_mes_txt { color: #3498db; font-size: 0.95rem; }
+
+        hr { width: 60%; border: 0; border-top: 1px solid #222; margin: 15px 0; }
 
         /* Principal */
         .main { flex: 1; overflow-y: auto; background: #000; }
@@ -64,7 +60,7 @@
         th { background: #00428a; color: #fff; font-size: 9px; padding: 10px 2px; position: sticky; top: 0; text-transform: uppercase; border-bottom: 1px solid #333; z-index: 10; }
         td { border-bottom: 1px solid #1a1a1a; padding: 6px 2px; text-align: center; font-size: 12px; font-weight: bold; }
         tr:nth-child(even) { background: #080808; }
-        .col-patio{ color: #3498db; font-size: 14px; }
+        .col-patio { color: #3498db; font-size: 14px; }
         .col-doca { color: #f1c40f; font-size: 13px; }
         .col-valor { color: #2ecc71; font-size: 11px; }
     </style>
@@ -73,17 +69,17 @@
     <div class="sidebar">
         <h2>CD-84 MATEUS</h2>
         
-        <div class="gauge-block">
-            <div id="chart_diario" class="chart-div" style="height: 140px;"></div>
-            <p class="label-gauge">FATURAMENTO ATUAL</p>
+        <div class="gauge-wrapper">
+            <div id="chart_diario" style="height: 140px;"></div>
+            <p class="label-gauge">Faturamento Atual</p>
             <div id="fat_txt">R$ 0,00</div>
         </div>
 
         <hr>
 
-        <div class="gauge-block">
-            <div id="chart_mensal" class="chart-div" style="height: 110px;"></div>
-            <p class="label-gauge">FATURAMENTO MÊS (21M)</p>
+        <div class="gauge-wrapper">
+            <div id="chart_mensal" style="height: 105px;"></div>
+            <p class="label-gauge">Faturamento Mês (21M)</p>
             <div id="fat_mes_txt">R$ 0,00</div>
         </div>
     </div>
@@ -113,61 +109,57 @@
         google.charts.load('current', {'packages':['gauge']});
         google.charts.setOnLoadCallback(iniciar);
 
-        let chartDiario, chartMensal, dataDiario, dataMensal, optDiario, optMensal;
+        let chartD, chartM, dataD, dataM, optD, optM;
 
         function iniciar() {
-            chartDiario = new google.visualization.Gauge(document.getElementById('chart_diario'));
-            dataDiario = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
-            optDiario = { width: 140, height: 140, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
+            chartD = new google.visualization.Gauge(document.getElementById('chart_diario'));
+            dataD = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
+            optD = { width: 140, height: 140, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
 
-            chartMensal = new google.visualization.Gauge(document.getElementById('chart_mensal'));
-            dataMensal = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
-            optMensal = { width: 100, height: 100, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
+            chartM = new google.visualization.Gauge(document.getElementById('chart_mensal'));
+            dataM = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
+            // Reduzi levemente a largura interna para garantir que o Google centralize no eixo
+            optM = { width: 100, height: 100, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
             
             atualizar();
             setInterval(atualizar, 15000); 
         }
 
-        function limparMoeda(texto) {
-            if (!texto) return 0;
-            return parseFloat(texto.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+        function n(v) {
+            if (!v) return 0;
+            return parseFloat(v.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
         }
 
         async function atualizar() {
             try {
-                const res = await fetch(LINK_API);
-                const json = await res.json();
+                const r = await fetch(LINK_API);
+                const j = await r.json();
                 
-                // Update Diário
-                document.getElementById('fat_txt').innerText = json.faturamento || "R$ 0,00";
-                let vD = limparMoeda(json.faturamento);
-                let percD = Math.round((vD / (json.meta || 950000)) * 100);
-                dataDiario.setValue(0, 1, percD > 100 ? 100 : percD);
-                chartDiario.draw(dataDiario, optDiario);
+                document.getElementById('fat_txt').innerText = j.faturamento;
+                let pD = Math.round((n(j.faturamento) / (j.meta || 950000)) * 100);
+                dataD.setValue(0, 1, pD > 100 ? 100 : pD);
+                chartD.draw(dataD, optD);
 
-                // Update Mensal
-                if(json.faturamentoMes) {
-                    document.getElementById('fat_mes_txt').innerText = json.faturamentoMes;
-                    let vM = limparMoeda(json.faturamentoMes);
-                    let percM = Math.round((vM / 21000000) * 100);
-                    dataMensal.setValue(0, 1, percM > 100 ? 100 : percM);
-                    chartMensal.draw(dataMensal, optMensal);
+                if(j.faturamentoMes) {
+                    document.getElementById('fat_mes_txt').innerText = j.faturamentoMes;
+                    let pM = Math.round((n(j.faturamentoMes) / 21000000) * 100);
+                    dataM.setValue(0, 1, pM > 100 ? 100 : pM);
+                    chartM.draw(dataM, optM);
                 }
 
-                // Update Tabela
-                const body = document.getElementById('tabelaBody');
-                body.innerHTML = "";
-                if (json.veiculos) {
-                    json.veiculos.forEach(v => {
-                        const row = body.insertRow();
-                        let cor = "#fff";
-                        let t = (v.tipo || "").toUpperCase();
-                        if(t.includes("ABASTECIMENTO")) cor = "#f39c12";
-                        else if(t.includes("ELETRO")) cor = "#2ecc71";
-                        else if(t !== "") cor = "#dc3545";
+                const b = document.getElementById('tabelaBody');
+                b.innerHTML = "";
+                if (j.veiculos) {
+                    j.veiculos.forEach(v => {
+                        const row = b.insertRow();
+                        let c = "#fff";
+                        let t = v.tipo.toUpperCase();
+                        if(t.includes("ABASTECIMENTO")) c = "#f39c12";
+                        else if(t.includes("ELETRO")) c = "#2ecc71";
+                        else if(t !== "") c = "#dc3545";
 
                         row.innerHTML = `
-                            <td style="color:${cor}">${v.tipo}</td>
+                            <td style="color:${c}">${v.tipo}</td>
                             <td>${v.filial}</td>
                             <td class="col-doca">${v.doca}</td>
                             <td class="col-valor">${v.valor}</td>
@@ -179,7 +171,7 @@
                         `;
                     });
                 }
-            } catch (e) { console.error("Erro:", e); }
+            } catch (e) { console.error(e); }
         }
     </script>
 </body>
