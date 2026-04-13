@@ -10,9 +10,13 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; display: flex; height: 100vh; overflow: hidden; }
         
         /* Lateral */
-        .sidebar { width: 170px; border-right: 1px solid #333; display: flex; flex-direction: column; align-items: center; padding: 15px 5px; gap: 20px; background: #050505; }
+        .sidebar { width: 170px; border-right: 1px solid #333; display: flex; flex-direction: column; align-items: center; padding: 15px 5px; gap: 15px; background: #050505; }
         .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; }
         #fat_txt { color: #2ecc71; font-size: 1.1rem; font-weight: bold; text-align: center; }
+        
+        /* Novo estilo para o Faturamento do Mês (Célula I2) */
+        .fat-mes-container { border-top: 1px solid #222; padding-top: 10px; width: 100%; text-align: center; }
+        #fat_mes_txt { color: #3498db; font-size: 1rem; font-weight: bold; }
         
         /* Principal */
         .main { flex: 1; overflow-y: auto; background: #000; }
@@ -38,8 +42,14 @@
     <div class="sidebar">
         <h2>CD-84 MATEUS</h2>
         <div id="chart_div"></div>
+        
         <div id="fat_txt">R$ 0,00</div>
-        <p style="font-size: 8px; color: #444;">FATURAMENTO ATUAL</p>
+        <p style="font-size: 8px; color: #444; margin-bottom: 5px;">FATURAMENTO ATUAL</p>
+
+        <div class="fat-mes-container">
+            <div id="fat_mes_txt">R$ 0,00</div>
+            <p style="font-size: 8px; color: #444;">FATURAMENTO MÊS (I2)</p>
+        </div>
     </div>
 
     <div class="main">
@@ -53,7 +63,7 @@
                     <th style="width: 10%">VEIC</th>
                     <th style="width: 12%">DATA</th>
                     <th style="width: 6%">VEZ</th>
-                    <th style="width: 18%">patio</th>
+                    <th style="width: 18%">PATIO</th>
                     <th style="width: 12%">CUB</th>
                 </tr>
             </thead>
@@ -62,7 +72,6 @@
     </div>
 
     <script>
-        // O seu link já está inserido corretamente aqui
         const LINK_API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
 
         google.charts.load('current', {'packages':['gauge']});
@@ -76,34 +85,37 @@
             options = { width: 140, height: 140, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
             
             atualizar();
-            setInterval(atualizar, 15000); // Atualiza a cada 15 segundos
+            setInterval(atualizar, 15000); 
         }
 
         async function atualizar() {
             try {
-                // Adicionado 'follow' para evitar erro de redirecionamento do Google
                 const res = await fetch(LINK_API, { method: 'GET', redirect: 'follow' });
                 const json = await res.json();
                 
-                // Atualiza Texto Faturamento
+                // 1. Atualiza Faturamento Atual
                 document.getElementById('fat_txt').innerText = json.faturamento;
 
-                // Atualiza Velocímetro
+                // 2. Atualiza Faturamento Mês (Célula I2)
+                // Nota: O seu script do Google Apps Script precisa retornar a propriedade 'faturamentoMes'
+                if(json.faturamentoMes) {
+                    document.getElementById('fat_mes_txt').innerText = json.faturamentoMes;
+                }
+
+                // 3. Atualiza Velocímetro
                 let num = parseFloat(json.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
                 let meta = json.meta || 950000;
                 let perc = Math.round((num / meta) * 100);
                 dataChart.setValue(0, 1, perc > 100 ? 100 : perc);
                 chart.draw(dataChart, options);
 
-                // Atualiza Tabela
+                // 4. Atualiza Tabela
                 const body = document.getElementById('tabelaBody');
                 body.innerHTML = "";
                 
                 if (json.veiculos && json.veiculos.length > 0) {
                     json.veiculos.forEach(v => {
                         const row = body.insertRow();
-                        
-                        // Cor do Tipo
                         let cor = "#fff";
                         let t = v.tipo.toUpperCase();
                         if(t.includes("ABASTECIMENTO")) cor = "#f39c12";
