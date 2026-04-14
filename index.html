@@ -18,6 +18,7 @@
             padding: 20px 0; 
             background: #050505;
             flex-shrink: 0;
+            z-index: 20;
         }
         
         .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
@@ -38,34 +39,54 @@
             align-items: center;
         }
 
-        /* LEGENDA DOS CONTADORES: Aumentada conforme solicitado */
         .label-gauge { 
-            font-size: 13px; /* Aumentado de 11px para 13px */
-            font-weight: 800; /* Extra negrito */
-            color: #ccc; /* Cinza claro para melhor contraste */
+            font-size: 13px; 
+            font-weight: 800; 
+            color: #ccc; 
             text-transform: uppercase; 
             text-align: center;
-            margin-top: -10px; /* Aproxima um pouco mais do gráfico */
+            margin-top: -10px; 
             margin-bottom: 8px;
             letter-spacing: 0.8px;
             width: 90%;
         }
         
-        #fat_txt, #fat_mes_txt { font-weight: bold; text-align: center; width: 100%; }
+        #fat_txt, #fat_mes_txt { font-weight: bold; text-align: center; width: 100%; transition: transform 0.2s; }
         #fat_txt { color: #2ecc71; font-size: 1.1rem; }
         #fat_mes_txt { color: #3498db; font-size: 0.95rem; }
 
         hr { width: 60%; border: 0; border-top: 1px solid #222; margin: 15px 0; }
 
-        .main { flex: 1; overflow-y: auto; background: #000; }
+        .main { flex: 1; overflow-y: auto; background: #000; position: relative; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         th { background: #00428a; color: #fff; font-size: 9px; padding: 10px 2px; position: sticky; top: 0; text-transform: uppercase; border-bottom: 1px solid #333; z-index: 10; }
-        td { border-bottom: 1px solid #1a1a1a; padding: 6px 2px; text-align: center; font-size: 12px; font-weight: bold; }
+        td { border-bottom: 1px solid #1a1a1a; padding: 6px 2px; text-align: center; font-size: 12px; font-weight: bold; transition: all 0.5s; }
         tr:nth-child(even) { background: #080808; }
         
         .col-patio { color: #3498db; font-size: 14px; }
         .col-doca { color: #f1c40f; font-size: 13px; }
         .col-valor { color: #2ecc71; font-size: 11px; }
+
+        /* --- ESTILOS DA ANIMAÇÃO DE PARTÍCULAS --- */
+        .particula {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: #2ecc71;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 0 8px #2ecc71;
+        }
+
+        .linha-saindo {
+            animation: desintegrar 0.8s forwards;
+        }
+
+        @keyframes desintegrar {
+            0% { opacity: 1; transform: scale(1); filter: blur(0); }
+            100% { opacity: 0; transform: scale(0.8) translateX(30px); filter: blur(10px); }
+        }
     </style>
 </head>
 <body>
@@ -80,7 +101,7 @@
 
         <hr>
 
-        <div class="gauge-wrapper">
+        <div class="gauge-wrapper" id="target_mensal">
             <div class="chart-box" id="chart_mensal" style="height: 140px;"></div>
             <p class="label-gauge">FATURAMENTO MÊS (21M)</p>
             <div id="fat_mes_txt">R$ 0,00</div>
@@ -114,6 +135,7 @@
 
         let chartD, chartM, dataD, dataM;
         let opt = { width: 140, height: 140, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
+        let veiculosAntigos = [];
 
         function iniciar() {
             try {
@@ -131,6 +153,33 @@
         function converterParaNumero(valor) {
             if (!valor || typeof valor !== 'string') return 0;
             return parseFloat(valor.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+        }
+
+        // --- FUNÇÃO DA ANIMAÇÃO ---
+        function dispararParticulas(origemX, origemY) {
+            const destino = document.getElementById('target_mensal').getBoundingClientRect();
+            const container = document.body;
+
+            for (let i = 0; i < 12; i++) {
+                const p = document.createElement('div');
+                p.className = 'particula';
+                p.style.left = origemX + 'px';
+                p.style.top = origemY + 'px';
+                container.appendChild(p);
+
+                p.animate([
+                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                    { transform: `translate(${destino.left - origemX + 70}px, ${destino.top - origemY + 50}px) scale(0)`, opacity: 0 }
+                ], {
+                    duration: 1000 + (Math.random() * 500),
+                    easing: 'ease-in-out'
+                }).onfinish = () => {
+                    p.remove();
+                    // Pequeno efeito de pulso no faturamento mensal
+                    document.getElementById('fat_mes_txt').style.transform = "scale(1.1)";
+                    setTimeout(() => document.getElementById('fat_mes_txt').style.transform = "scale(1)", 100);
+                };
+            }
         }
 
         async function atualizar() {
@@ -156,27 +205,49 @@
 
                 const tabelaBody = document.getElementById('tabelaBody');
                 if (dados.veiculos && Array.isArray(dados.veiculos)) {
-                    let conteudoHtml = "";
-                    dados.veiculos.forEach(v => {
-                        let corTipo = "#fff";
-                        let tipoTexto = (v.tipo || "").toUpperCase();
-                        if(tipoTexto.includes("ABASTECIMENTO")) corTipo = "#f39c12";
-                        else if(tipoTexto.includes("ELETRO")) corTipo = "#2ecc71";
-                        else if(tipoTexto !== "") corTipo = "#dc3545";
+                    
+                    // Lógica para detectar veículos que saíram (finalizados)
+                    if (veiculosAntigos.length > 0) {
+                        veiculosAntigos.forEach((vAntigo, index) => {
+                            const aindaExiste = dados.veiculos.some(vNovo => vNovo.veiculos === vAntigo.veiculos && vNovo.patio === vAntigo.patio);
+                            if (!aindaExiste) {
+                                // O veículo saiu! Disparar animação da linha correspondente
+                                const linhas = tabelaBody.querySelectorAll('tr');
+                                if (linhas[index]) {
+                                    const rect = linhas[index].getBoundingClientRect();
+                                    dispararParticulas(rect.left + 200, rect.top);
+                                    linhas[index].classList.add('linha-saindo');
+                                }
+                            }
+                        });
+                    }
+                    
+                    veiculosAntigos = JSON.parse(JSON.stringify(dados.veiculos));
 
-                        conteudoHtml += `<tr>
-                            <td style="color:${corTipo}">${v.tipo || ""}</td>
-                            <td>${v.filial || ""}</td>
-                            <td class="col-doca">${v.doca || ""}</td>
-                            <td class="col-valor">${v.valor || ""}</td>
-                            <td>${v.veiculos || ""}</td>
-                            <td style="color:#666; font-size:10px">${v.data || ""}</td>
-                            <td>${v.vez || ""}</td>
-                            <td class="col-patio">${v.patio || ""}</td>
-                            <td>${v.cubagem || ""}</td>
-                        </tr>`;
-                    });
-                    tabelaBody.innerHTML = conteudoHtml;
+                    // Pequeno delay para a animação de saída acontecer antes de recarregar a tabela
+                    setTimeout(() => {
+                        let conteudoHtml = "";
+                        dados.veiculos.forEach(v => {
+                            let corTipo = "#fff";
+                            let tipoTexto = (v.tipo || "").toUpperCase();
+                            if(tipoTexto.includes("ABASTECIMENTO")) corTipo = "#f39c12";
+                            else if(tipoTexto.includes("ELETRO")) corTipo = "#2ecc71";
+                            else if(tipoTexto !== "") corTipo = "#dc3545";
+
+                            conteudoHtml += `<tr>
+                                <td style="color:${corTipo}">${v.tipo || ""}</td>
+                                <td>${v.filial || ""}</td>
+                                <td class="col-doca">${v.doca || ""}</td>
+                                <td class="col-valor">${v.valor || ""}</td>
+                                <td>${v.veiculos || ""}</td>
+                                <td style="color:#666; font-size:10px">${v.data || ""}</td>
+                                <td>${v.vez || ""}</td>
+                                <td class="col-patio">${v.patio || ""}</td>
+                                <td>${v.cubagem || ""}</td>
+                            </tr>`;
+                        });
+                        tabelaBody.innerHTML = conteudoHtml;
+                    }, 800);
                 }
             } catch (err) { 
                 console.error("Erro ao atualizar dados:", err); 
