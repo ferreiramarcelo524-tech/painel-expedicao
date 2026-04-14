@@ -1,226 +1,258 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Expedição CD-84</title>
-    
-    <style>
-        /* CONFIGURAÇÕES VISUAIS DO PAINEL */
-        :root {
-            --cor-mateus: #2ecc71;
-            --cor-fundo: #1a1a1a;
-            --cor-texto: #ffffff;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--cor-fundo);
-            color: var(--cor-texto);
-            margin: 0;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-
-        /* HEADER E MEDIDOR MENSAL */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: #222;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        #medidor-mensal {
-            text-align: center;
-            padding: 20px;
-            border: 2px solid var(--cor-mateus);
-            border-radius: 15px;
-            min-width: 300px;
-            background: rgba(46, 204, 113, 0.1);
-        }
-
-        .valor-meta {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--cor-mateus);
-            text-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
-        }
-
-        /* TABELA DE PEDIDOS */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #222;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        th {
-            background-color: #333;
-            color: var(--cor-mateus);
-            padding: 15px;
-            text-align: left;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #333;
-            font-size: 1.1rem;
-        }
-
-        .btn-finalizar {
-            background-color: var(--cor-mateus);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            cursor: pointer;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: transform 0.2s;
-        }
-
-        .btn-finalizar:active {
-            transform: scale(0.9);
-        }
-
-        /* ============================================================
-           SISTEMA DE PARTÍCULAS (OTIMIZADO SMART TV)
-           ============================================================ */
+!DOCTYPE html
+html lang=pt-br
+head
+    meta charset=UTF-8
+    meta name=viewport content=width=device-width, initial-scale=1.0
+    titlePAINEL CD-84 EXPEDIÇÃOtitle
+    script type=textjavascript src=httpswww.gstatic.comchartsloader.jsscript
+    style
+         { box-sizing border-box; margin 0; padding 0; }
+        body { font-family 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background #000; color #fff; display flex; height 100vh; overflow hidden; }
         
-        .particula-faturamento {
-            position: fixed;
-            width: 12px;
-            height: 12px;
-            background: radial-gradient(circle, #2ecc71, #27ae60);
-            border-radius: 50%;
-            z-index: 9999;
-            pointer-events: none;
-            /* Transição suave para movimento e escala */
-            transition: left 1.2s cubic-bezier(0.42, 0, 0.58, 1), 
-                        top 1.2s cubic-bezier(0.42, 0, 0.58, 1), 
-                        transform 1.2s ease-in, 
-                        opacity 1.2s ease-in;
+        .sidebar { 
+            width 170px; 
+            border-right 1px solid #333; 
+            display flex; 
+            flex-direction column; 
+            align-items center; 
+            padding 20px 0; 
+            background #050505;
+            flex-shrink 0;
+            z-index 20;
+        }
+        
+        .sidebar h2 { font-size 10px; color #555; text-transform uppercase; letter-spacing 1px; margin-bottom 20px; }
+
+        .gauge-wrapper {
+            width 100%;
+            display flex;
+            flex-direction column;
+            align-items center;
+            justify-content center;
+            margin-bottom 10px;
         }
 
-        /* Efeito de sumiço da linha do pedido */
-        .linha-expedida {
-            pointer-events: none;
-            filter: blur(8px);
-            opacity: 0;
-            transform: translateX(50px);
-            transition: all 0.8s ease-in-out;
+        .chart-box {
+            width 170px; 
+            display flex;
+            justify-content center;
+            align-items center;
         }
 
-    </style>
-</head>
-<body>
+        .label-gauge { 
+            font-size 13px; 
+            font-weight 800; 
+            color #ccc; 
+            text-transform uppercase; 
+            text-align center;
+            margin-top -10px; 
+            margin-bottom 8px;
+            letter-spacing 0.8px;
+            width 90%;
+        }
+        
+        #fat_txt, #fat_mes_txt { font-weight bold; text-align center; width 100%; transition transform 0.2s; }
+        #fat_txt { color #2ecc71; font-size 1.1rem; }
+        #fat_mes_txt { color #3498db; font-size 0.95rem; }
 
-    <div class="header">
-        <div>
-            <h1>EXPEDIÇÃO CD-84</h1>
-            <p>Status em tempo real das docas</p>
-        </div>
-        <div id="medidor-mensal">
-            <div>ACUMULADO MENSAL</div>
-            <div class="valor-meta" id="display-mensal">R$ 15.420.000,00</div>
-        </div>
-    </div>
+        hr { width 60%; border 0; border-top 1px solid #222; margin 15px 0; }
 
-    <table>
-        <thead>
-            <tr>
-                <th>Carga / Veículo</th>
-                <th>Valor dos Pedidos</th>
-                <th>Operação</th>
-            </tr>
-        </thead>
-        <tbody id="corpo-tabela">
-            <tr id="linha-1">
-                <td>CARGA NORDESTE - PLACA ABC-1234</td>
-                <td><strong>R$ 45.000,00</strong></td>
-                <td><button class="btn-finalizar" onclick="processarFinalizacao('linha-1', 45000)">FINALIZAR</button></td>
-            </tr>
-            <tr id="linha-2">
-                <td>CARGA SUL - PLACA XYZ-9876</td>
-                <td><strong>R$ 120.000,00</strong></td>
-                <td><button class="btn-finalizar" onclick="processarFinalizacao('linha-2', 120000)">FINALIZAR</button></td>
-            </tr>
-            <tr id="linha-3">
-                <td>CARGA LOCAL - PLACA JKL-5544</td>
-                <td><strong>R$ 12.800,00</strong></td>
-                <td><button class="btn-finalizar" onclick="processarFinalizacao('linha-3', 12800)">FINALIZAR</button></td>
-            </tr>
-        </tbody>
-    </table>
+        .main { flex 1; overflow-y auto; background #000; position relative; }
+        table { width 100%; border-collapse collapse; table-layout fixed; }
+        th { background #00428a; color #fff; font-size 9px; padding 10px 2px; position sticky; top 0; text-transform uppercase; border-bottom 1px solid #333; z-index 10; }
+        td { border-bottom 1px solid #1a1a1a; padding 6px 2px; text-align center; font-size 12px; font-weight bold; transition all 0.5s; }
+        trnth-child(even) { background #080808; }
+        
+        .col-patio { color #3498db; font-size 14px; }
+        .col-doca { color #f1c40f; font-size 13px; }
+        .col-valor { color #2ecc71; font-size 11px; }
 
-    <script>
-        // Função que une a animação com a lógica de dados
-        function processarFinalizacao(idLinha, valor) {
-            // 1. Executa a animação visual
-            dispararAnimacao(idLinha, 'medidor-mensal');
-
-            // 2. Simulação de atualização de dados (Aqui você ligaria ao seu Google Sheets)
-            console.log("Finalizando carga no valor de R$ " + valor);
+         --- ESTILOS DA ANIMAÇÃO DE PARTÍCULAS --- 
+        .particula {
+            position fixed;
+            width 6px;
+            height 6px;
+            background #2ecc71;
+            border-radius 50%;
+            pointer-events none;
+            z-index 100;
+            box-shadow 0 0 8px #2ecc71;
         }
 
-        function dispararAnimacao(idLinha, idDestino) {
-            const linha = document.getElementById(idLinha);
-            const destino = document.getElementById(idDestino);
+        .linha-saindo {
+            animation desintegrar 0.8s forwards;
+        }
 
-            if (!linha || !destino) return;
+        @keyframes desintegrar {
+            0% { opacity 1; transform scale(1); filter blur(0); }
+            100% { opacity 0; transform scale(0.8) translateX(30px); filter blur(10px); }
+        }
+    style
+head
+body
+    div class=sidebar
+        h2CD-84 MATEUSh2
+        
+        div class=gauge-wrapper
+            div class=chart-box id=chart_diario style=height 140px;div
+            p class=label-gaugeFATURAMENTO ATUALp
+            div id=fat_txtR$ 0,00div
+        div
 
-            const rectOrigem = linha.getBoundingClientRect();
-            const rectDestino = destino.getBoundingClientRect();
+        hr
 
-            // Inicia o efeito de desintegrar a linha
-            linha.classList.add('linha-expedida');
+        div class=gauge-wrapper id=target_mensal
+            div class=chart-box id=chart_mensal style=height 140px;div
+            p class=label-gaugeFATURAMENTO MÊS (21M)p
+            div id=fat_mes_txtR$ 0,00div
+        div
+    div
 
-            // CONFIGURAÇÃO: 50 partículas para efeito intenso
-            const quantidade = 50;
+    div class=main
+        table
+            thead
+                tr
+                    th style=width 14%TIPOth
+                    th style=width 8%FILth
+                    th style=width 8%DOCAth
+                    th style=width 12%VALORth
+                    th style=width 10%VEICth
+                    th style=width 12%DATAth
+                    th style=width 6%VEZth
+                    th style=width 18%PATIOth
+                    th style=width 12%CUBth
+                tr
+            thead
+            tbody id=tabelaBodytbody
+        table
+    div
 
-            for (let i = 0; i < quantidade; i++) {
-                setTimeout(() => {
-                    const bolinha = document.createElement('div');
-                    bolinha.className = 'particula-faturamento';
-                    
-                    // Posição inicial (Centro da linha com espalhamento aleatório)
-                    const randomX = (Math.random() - 0.5) * 60;
-                    const randomY = (Math.random() - 0.5) * 30;
+    script
+        const LINK_API = httpsscript.google.commacrossAKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1Aexec;
 
-                    bolinha.style.left = (rectOrigem.left + rectOrigem.width / 2 + randomX) + 'px';
-                    bolinha.style.top = (rectOrigem.top + rectOrigem.height / 2 + randomY) + 'px';
-                    bolinha.style.transform = 'scale(1)';
-                    bolinha.style.opacity = '1';
+        google.charts.load('current', {'packages'['gauge']});
+        google.charts.setOnLoadCallback(iniciar);
 
-                    document.body.appendChild(bolinha);
+        let chartD, chartM, dataD, dataM;
+        let opt = { width 140, height 140, redFrom 0, redTo 50, yellowFrom 50, yellowTo 85, greenFrom 85, greenTo 100, minorTicks 5 };
+        let veiculosAntigos = [];
 
-                    // Forçar o navegador a processar a posição inicial
-                    setTimeout(() => {
-                        // Mover para o medidor mensal com leve variação de destino
-                        const destX = (Math.random() - 0.5) * 50;
-                        bolinha.style.left = (rectDestino.left + rectDestino.width / 2 + destX) + 'px';
-                        bolinha.style.top = (rectDestino.top + rectDestino.height / 2) + 'px';
-                        bolinha.style.transform = 'scale(0.1)'; 
-                        bolinha.style.opacity = '0';
-                    }, 50);
+        function iniciar() {
+            try {
+                chartD = new google.visualization.Gauge(document.getElementById('chart_diario'));
+                dataD = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
 
-                    // Remove do sistema para não pesar a memória da TV
-                    setTimeout(() => bolinha.remove(), 1500);
+                chartM = new google.visualization.Gauge(document.getElementById('chart_mensal'));
+                dataM = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
+                
+                atualizar();
+                setInterval(atualizar, 15000);
+            } catch (e) { console.error(Erro na inicialização, e); }
+        }
 
-                }, i * 25); // Intervalo curto (25ms) para criar um fluxo contínuo
+        function converterParaNumero(valor) {
+            if (!valor  typeof valor !== 'string') return 0;
+            return parseFloat(valor.replace([R$s.]g, '').replace(',', '.'))  0;
+        }
+
+         --- FUNÇÃO DA ANIMAÇÃO ---
+        function dispararParticulas(origemX, origemY) {
+            const destino = document.getElementById('target_mensal').getBoundingClientRect();
+            const container = document.body;
+
+            for (let i = 0; i  12; i++) {
+                const p = document.createElement('div');
+                p.className = 'particula';
+                p.style.left = origemX + 'px';
+                p.style.top = origemY + 'px';
+                container.appendChild(p);
+
+                p.animate([
+                    { transform 'translate(0, 0) scale(1)', opacity 1 },
+                    { transform `translate(${destino.left - origemX + 70}px, ${destino.top - origemY + 50}px) scale(0)`, opacity 0 }
+                ], {
+                    duration 1000 + (Math.random()  500),
+                    easing 'ease-in-out'
+                }).onfinish = () = {
+                    p.remove();
+                     Pequeno efeito de pulso no faturamento mensal
+                    document.getElementById('fat_mes_txt').style.transform = scale(1.1);
+                    setTimeout(() = document.getElementById('fat_mes_txt').style.transform = scale(1), 100);
+                };
             }
-
-            // Remove a linha da tabela após a animação terminar
-            setTimeout(() => {
-                linha.style.display = 'none';
-            }, 1000);
         }
-    </script>
-</body>
-</html>
+
+        async function atualizar() {
+            try {
+                const response = await fetch(LINK_API);
+                const dados = await response.json();
+                
+                if(dados.faturamento) {
+                    document.getElementById('fat_txt').innerText = dados.faturamento;
+                    let numD = converterParaNumero(dados.faturamento);
+                    let percD = Math.round((numD  (dados.meta  950000))  100);
+                    dataD.setValue(0, 1, Math.min(percD, 100));
+                    chartD.draw(dataD, opt);
+                }
+
+                if(dados.faturamentoMes) {
+                    document.getElementById('fat_mes_txt').innerText = dados.faturamentoMes;
+                    let numM = converterParaNumero(dados.faturamentoMes);
+                    let percM = Math.round((numM  21000000)  100);
+                    dataM.setValue(0, 1, Math.min(percM, 100));
+                    chartM.draw(dataM, opt);
+                }
+
+                const tabelaBody = document.getElementById('tabelaBody');
+                if (dados.veiculos && Array.isArray(dados.veiculos)) {
+                    
+                     Lógica para detectar veículos que saíram (finalizados)
+                    if (veiculosAntigos.length  0) {
+                        veiculosAntigos.forEach((vAntigo, index) = {
+                            const aindaExiste = dados.veiculos.some(vNovo = vNovo.veiculos === vAntigo.veiculos && vNovo.patio === vAntigo.patio);
+                            if (!aindaExiste) {
+                                 O veículo saiu! Disparar animação da linha correspondente
+                                const linhas = tabelaBody.querySelectorAll('tr');
+                                if (linhas[index]) {
+                                    const rect = linhas[index].getBoundingClientRect();
+                                    dispararParticulas(rect.left + 200, rect.top);
+                                    linhas[index].classList.add('linha-saindo');
+                                }
+                            }
+                        });
+                    }
+                    
+                    veiculosAntigos = JSON.parse(JSON.stringify(dados.veiculos));
+
+                     Pequeno delay para a animação de saída acontecer antes de recarregar a tabela
+                    setTimeout(() = {
+                        let conteudoHtml = ;
+                        dados.veiculos.forEach(v = {
+                            let corTipo = #fff;
+                            let tipoTexto = (v.tipo  ).toUpperCase();
+                            if(tipoTexto.includes(ABASTECIMENTO)) corTipo = #f39c12;
+                            else if(tipoTexto.includes(ELETRO)) corTipo = #2ecc71;
+                            else if(tipoTexto !== ) corTipo = #dc3545;
+
+                            conteudoHtml += `tr
+                                td style=color${corTipo}${v.tipo  }td
+                                td${v.filial  }td
+                                td class=col-doca${v.doca  }td
+                                td class=col-valor${v.valor  }td
+                                td${v.veiculos  }td
+                                td style=color#666; font-size10px${v.data  }td
+                                td${v.vez  }td
+                                td class=col-patio${v.patio  }td
+                                td${v.cubagem  }td
+                            tr`;
+                        });
+                        tabelaBody.innerHTML = conteudoHtml;
+                    }, 800);
+                }
+            } catch (err) { 
+                console.error(Erro ao atualizar dados, err); 
+            }
+        }
+    script
+body
+html
