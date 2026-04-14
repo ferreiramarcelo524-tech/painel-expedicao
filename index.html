@@ -3,204 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expedição CD-84 - Oficial</title>
-    
+    <title>PAINEL CD-84 EXPEDIÇÃO</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-        /* CONFIGURAÇÕES DE CORES E FUNDO */
-        :root {
-            --cor-mateus: #2ecc71;
-            --cor-doca: #f1c40f;
-            --cor-fundo: #000000;
-            --cor-tabela: #111111;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; display: flex; height: 100vh; overflow: hidden; }
+        
+        .sidebar { 
+            width: 170px; 
+            border-right: 1px solid #333; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px 0; 
+            background: #050505;
+            flex-shrink: 0;
         }
+        
+        .sidebar h2 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
 
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--cor-fundo);
-            color: white;
-            margin: 0;
-            padding: 10px;
-            overflow-x: hidden;
-        }
-
-        /* CABEÇALHO E MEDIDOR */
-        .header {
+        .gauge-wrapper {
+            width: 100%;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            padding: 15px;
-            background: #1a1a1a;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-bottom: 3px solid var(--cor-mateus);
+            justify-content: center;
+            margin-bottom: 10px;
         }
 
-        #medidor-mensal {
+        .chart-box {
+            width: 170px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* LEGENDA DOS CONTADORES: Aumentada conforme solicitado */
+        .label-gauge { 
+            font-size: 13px; /* Aumentado de 11px para 13px */
+            font-weight: 800; /* Extra negrito */
+            color: #ccc; /* Cinza claro para melhor contraste */
+            text-transform: uppercase; 
             text-align: center;
-            padding: 10px 20px;
-            border: 2px solid var(--cor-mateus);
-            border-radius: 10px;
-            background: rgba(46, 204, 113, 0.05);
+            margin-top: -10px; /* Aproxima um pouco mais do gráfico */
+            margin-bottom: 8px;
+            letter-spacing: 0.8px;
+            width: 90%;
         }
+        
+        #fat_txt, #fat_mes_txt { font-weight: bold; text-align: center; width: 100%; }
+        #fat_txt { color: #2ecc71; font-size: 1.1rem; }
+        #fat_mes_txt { color: #3498db; font-size: 0.95rem; }
 
-        .valor-meta {
-            font-size: 2.2rem;
-            font-weight: bold;
-            color: var(--cor-mateus);
-        }
+        hr { width: 60%; border: 0; border-top: 1px solid #222; margin: 15px 0; }
 
-        /* TABELA COM CORREÇÃO DE SOBREPOSIÇÃO */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--cor-tabela);
-            table-layout: fixed; /* ESSENCIAL: Mantém as colunas no lugar */
-        }
-
-        th {
-            background-color: #003366; /* Azul do seu cabeçalho original */
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-
-        td {
-            padding: 15px 10px;
-            border-bottom: 1px solid #222;
-            font-size: 1.1rem;
-            font-weight: bold;
-            
-            /* CORREÇÃO DO TEXTO SOBREPOSTO */
-            white-space: nowrap;       /* Não deixa o texto quebrar linha */
-            overflow: hidden;          /* Esconde o que sobra */
-            text-overflow: ellipsis;   /* Coloca os "..." se for muito grande */
-        }
-
-        /* DEFINIÇÃO DE LARGURA DAS COLUNAS */
-        .col-tipo { width: 22%; color: var(--cor-mateus); }
-        .col-fil  { width: 30%; }
-        .col-doca { width: 20%; color: var(--cor-doca); }
-        .col-valor{ width: 18%; }
-        .col-btn  { width: 10%; }
-
-        .btn-finalizar {
-            background-color: var(--cor-mateus);
-            color: black;
-            border: none;
-            padding: 8px 15px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-weight: bold;
-            width: 100%;
-        }
-
-        /* ANIMAÇÃO DE PARTÍCULAS */
-        .particula-faturamento {
-            position: fixed;
-            width: 14px;
-            height: 14px;
-            background: radial-gradient(circle, #2ecc71, #27ae60);
-            border-radius: 50%;
-            z-index: 9999;
-            pointer-events: none;
-            transition: left 1.2s cubic-bezier(0.42, 0, 0.58, 1), 
-                        top 1.2s cubic-bezier(0.42, 0, 0.58, 1), 
-                        transform 1.2s, opacity 1.2s;
-        }
-
-        .linha-expedida {
-            opacity: 0;
-            transform: translateX(30px);
-            transition: all 0.7s ease-in;
-        }
+        .main { flex: 1; overflow-y: auto; background: #000; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { background: #00428a; color: #fff; font-size: 9px; padding: 10px 2px; position: sticky; top: 0; text-transform: uppercase; border-bottom: 1px solid #333; z-index: 10; }
+        td { border-bottom: 1px solid #1a1a1a; padding: 6px 2px; text-align: center; font-size: 12px; font-weight: bold; }
+        tr:nth-child(even) { background: #080808; }
+        
+        .col-patio { color: #3498db; font-size: 14px; }
+        .col-doca { color: #f1c40f; font-size: 13px; }
+        .col-valor { color: #2ecc71; font-size: 11px; }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <div>
-            <h2 style="margin:0; color:var(--cor-mateus);">EXPEDIÇÃO CD-84</h2>
-            <span style="font-size: 0.8rem; color: #888;">LOGÍSTICA MATEUS</span>
+    <div class="sidebar">
+        <h2>CD-84 MATEUS</h2>
+        
+        <div class="gauge-wrapper">
+            <div class="chart-box" id="chart_diario" style="height: 140px;"></div>
+            <p class="label-gauge">FATURAMENTO ATUAL</p>
+            <div id="fat_txt">R$ 0,00</div>
         </div>
-        <div id="medidor-mensal">
-            <div style="font-size: 0.7rem;">ACUMULADO MENSAL</div>
-            <div class="valor-meta" id="display-mensal">R$ 15.420.000,00</div>
+
+        <hr>
+
+        <div class="gauge-wrapper">
+            <div class="chart-box" id="chart_mensal" style="height: 140px;"></div>
+            <p class="label-gauge">FATURAMENTO MÊS (21M)</p>
+            <div id="fat_mes_txt">R$ 0,00</div>
         </div>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th class="col-tipo">Tipo</th>
-                <th class="col-fil">Fil</th>
-                <th class="col-doca">Doca</th>
-                <th class="col-valor">Valor</th>
-                <th class="col-btn"></th>
-            </tr>
-        </thead>
-        <tbody id="tabela-corpo">
-            <tr id="linha-1">
-                <td class="col-tipo">ABASTECIMENTO</td>
-                <td class="col-fil">LOJA 632 - MARABÁ</td>
-                <td class="col-doca">DOCA 20</td>
-                <td class="col-valor">R$ 15.000</td>
-                <td class="col-btn"><button class="btn-finalizar" onclick="processarCarga('linha-1')">OK</button></td>
-            </tr>
-            <tr id="linha-2">
-                <td class="col-tipo">ELETRO</td>
-                <td class="col-fil">PARAGOMINAS - CENTRO</td>
-                <td class="col-doca">DOCA 13</td>
-                <td class="col-valor">R$ 42.800</td>
-                <td class="col-btn"><button class="btn-finalizar" onclick="processarCarga('linha-2')">OK</button></td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="main">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 14%">TIPO</th>
+                    <th style="width: 8%">FIL</th>
+                    <th style="width: 8%">DOCA</th>
+                    <th style="width: 12%">VALOR</th>
+                    <th style="width: 10%">VEIC</th>
+                    <th style="width: 12%">DATA</th>
+                    <th style="width: 6%">VEZ</th>
+                    <th style="width: 18%">PATIO</th>
+                    <th style="width: 12%">CUB</th>
+                </tr>
+            </thead>
+            <tbody id="tabelaBody"></tbody>
+        </table>
+    </div>
 
     <script>
-        function processarCarga(idLinha) {
-            dispararAnimacao(idLinha, 'medidor-mensal');
+        const LINK_API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
+
+        google.charts.load('current', {'packages':['gauge']});
+        google.charts.setOnLoadCallback(iniciar);
+
+        let chartD, chartM, dataD, dataM;
+        let opt = { width: 140, height: 140, redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 85, greenFrom: 85, greenTo: 100, minorTicks: 5 };
+
+        function iniciar() {
+            try {
+                chartD = new google.visualization.Gauge(document.getElementById('chart_diario'));
+                dataD = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
+
+                chartM = new google.visualization.Gauge(document.getElementById('chart_mensal'));
+                dataM = google.visualization.arrayToDataTable([['Label', 'Value'],['%', 0]]);
+                
+                atualizar();
+                setInterval(atualizar, 15000);
+            } catch (e) { console.error("Erro na inicialização:", e); }
         }
 
-        function dispararAnimacao(idLinha, idDestino) {
-            const linha = document.getElementById(idLinha);
-            const destino = document.getElementById(idDestino);
-            const rectOrigem = linha.getBoundingClientRect();
-            const rectDestino = destino.getBoundingClientRect();
+        function converterParaNumero(valor) {
+            if (!valor || typeof valor !== 'string') return 0;
+            return parseFloat(valor.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+        }
 
-            linha.classList.add('linha-expedida');
+        async function atualizar() {
+            try {
+                const response = await fetch(LINK_API);
+                const dados = await response.json();
+                
+                if(dados.faturamento) {
+                    document.getElementById('fat_txt').innerText = dados.faturamento;
+                    let numD = converterParaNumero(dados.faturamento);
+                    let percD = Math.round((numD / (dados.meta || 950000)) * 100);
+                    dataD.setValue(0, 1, Math.min(percD, 100));
+                    chartD.draw(dataD, opt);
+                }
 
-            const quantidade = 50; // Quantidade aumentada conforme solicitado
+                if(dados.faturamentoMes) {
+                    document.getElementById('fat_mes_txt').innerText = dados.faturamentoMes;
+                    let numM = converterParaNumero(dados.faturamentoMes);
+                    let percM = Math.round((numM / 21000000) * 100);
+                    dataM.setValue(0, 1, Math.min(percM, 100));
+                    chartM.draw(dataM, opt);
+                }
 
-            for (let i = 0; i < quantidade; i++) {
-                setTimeout(() => {
-                    const p = document.createElement('div');
-                    p.className = 'particula-faturamento';
-                    
-                    // Saída da linha
-                    const startX = rectOrigem.left + rectOrigem.width / 2 + (Math.random() - 0.5) * 50;
-                    const startY = rectOrigem.top + rectOrigem.height / 2;
+                const tabelaBody = document.getElementById('tabelaBody');
+                if (dados.veiculos && Array.isArray(dados.veiculos)) {
+                    let conteudoHtml = "";
+                    dados.veiculos.forEach(v => {
+                        let corTipo = "#fff";
+                        let tipoTexto = (v.tipo || "").toUpperCase();
+                        if(tipoTexto.includes("ABASTECIMENTO")) corTipo = "#f39c12";
+                        else if(tipoTexto.includes("ELETRO")) corTipo = "#2ecc71";
+                        else if(tipoTexto !== "") corTipo = "#dc3545";
 
-                    p.style.left = startX + 'px';
-                    p.style.top = startY + 'px';
-                    p.style.transform = 'scale(1)';
-                    
-                    document.body.appendChild(p);
-
-                    setTimeout(() => {
-                        // Voo até o medidor
-                        p.style.left = (rectDestino.left + rectDestino.width / 2) + 'px';
-                        p.style.top = (rectDestino.top + rectDestino.height / 2) + 'px';
-                        p.style.transform = 'scale(0.1)';
-                        p.style.opacity = '0';
-                    }, 50);
-
-                    setTimeout(() => p.remove(), 1400);
-                }, i * 25);
+                        conteudoHtml += `<tr>
+                            <td style="color:${corTipo}">${v.tipo || ""}</td>
+                            <td>${v.filial || ""}</td>
+                            <td class="col-doca">${v.doca || ""}</td>
+                            <td class="col-valor">${v.valor || ""}</td>
+                            <td>${v.veiculos || ""}</td>
+                            <td style="color:#666; font-size:10px">${v.data || ""}</td>
+                            <td>${v.vez || ""}</td>
+                            <td class="col-patio">${v.patio || ""}</td>
+                            <td>${v.cubagem || ""}</td>
+                        </tr>`;
+                    });
+                    tabelaBody.innerHTML = conteudoHtml;
+                }
+            } catch (err) { 
+                console.error("Erro ao atualizar dados:", err); 
             }
-
-            setTimeout(() => { linha.style.display = 'none'; }, 800);
         }
     </script>
 </body>
