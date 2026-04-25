@@ -2,9 +2,9 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SISTEMA EXPEDIÇÃO CD-84</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #05070a;
@@ -13,233 +13,216 @@
             --red: #da3633;
             --yellow: #d29922;
             --green: #3fb950;
-            --border: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.1);
             --text: #c9d1d9;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--bg); 
             color: var(--text); 
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            height: 100vh; 
+            width: 100vw;
+            overflow: hidden; /* Impede scroll na página inteira */
         }
 
-        /* Container Principal Responsivo */
-        .dashboard-container {
+        /* Layout em Grade Principal */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 260px 1fr 300px;
+            grid-template-rows: 80px 1fr;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        /* Cabeçalho Superior */
+        .header {
+            grid-column: 1 / -1;
+            background: var(--panel);
+            border-radius: 12px;
             display: flex;
-            flex-direction: row;
-            flex: 1;
-            height: 100vh; /* Para TVs */
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 25px;
+            border: 1px solid var(--border);
+        }
+
+        .header h1 { font-size: clamp(1.2rem, 2vw, 1.8rem); font-weight: 900; }
+        .header h1 span { color: var(--accent); }
+
+        /* Coluna Lateral: Indicadores */
+        .sidebar {
+            grid-row: 2;
+            background: var(--panel);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding: 20px;
+        }
+
+        .indicator { text-align: center; }
+        .ring-container { position: relative; width: 140px; height: 140px; margin: 0 auto; }
+        svg { transform: rotate(-90deg); width: 140px; height: 140px; }
+        circle { fill: none; stroke-width: 12; stroke-linecap: round; }
+        .c-bg { stroke: rgba(255,255,255,0.05); }
+        .c-bar { stroke-dasharray: 440; stroke-dashoffset: 440; transition: 1s ease; }
+        
+        .perc-txt { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; font-weight: 900; }
+        .ind-label { font-size: 11px; font-weight: 700; color: #8b949e; text-transform: uppercase; margin-top: 10px; }
+        .ind-val { font-size: 1.1rem; font-weight: 800; margin-top: 5px; }
+
+        /* Painel Central: Tabela Principal */
+        .main-panel {
+            grid-row: 2;
+            background: var(--panel);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
         }
 
-        /* --- SIDEBAR (METAS) --- */
-        .sidebar {
-            width: 240px;
+        .panel-title { padding: 15px; font-size: 0.9rem; font-weight: 800; border-bottom: 1px solid var(--border); color: var(--accent); background: rgba(255,255,255,0.02); }
+
+        .scroll-area { flex: 1; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: center; }
+        th { position: sticky; top: 0; background: #161b22; padding: 15px 5px; font-size: 11px; color: #8b949e; text-transform: uppercase; z-index: 10; border-bottom: 2px solid var(--border); }
+        td { padding: 14px 5px; font-size: 13px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.03); }
+
+        /* Fila Lateral */
+        .right-panel {
+            grid-row: 2;
             background: var(--panel);
-            border-right: 1px solid var(--border);
+            border-radius: 12px;
+            border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            padding: 20px;
-            align-items: center;
-            flex-shrink: 0;
+            overflow: hidden;
         }
+        .right-panel .panel-title { color: var(--yellow); }
 
-        .brand { font-weight: 900; font-size: 0.75rem; margin-bottom: 25px; opacity: 0.6; text-transform: uppercase; }
-
-        .indicator-card { text-align: center; margin-bottom: 30px; width: 100%; }
-        
-        .progress-ring { position: relative; width: 120px; height: 120px; margin: 0 auto; }
-        .progress-ring svg { transform: rotate(-90deg); width: 120px; height: 120px; }
-        .progress-ring circle { fill: none; stroke-width: 10; stroke-linecap: round; }
-        .circle-bg { stroke: rgba(255,255,255,0.05); }
-        .circle-bar { stroke-dasharray: 345; stroke-dashoffset: 345; transition: stroke-dashoffset 1s ease, stroke 0.5s ease; }
-
-        .percentage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2rem; font-weight: 800; }
-        .indicator-label { font-size: 10px; font-weight: 700; color: #8b949e; text-transform: uppercase; margin-top: 10px; }
-        .indicator-value { font-size: 0.95rem; font-weight: 800; margin-top: 5px; word-break: break-all; }
-
-        /* --- CONTEÚDO CENTRAL --- */
-        .main-content { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            padding: 20px; 
-            gap: 15px; 
-            overflow: hidden; 
-        }
-
-        .header-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .header-top h1 { font-size: 1.5rem; font-weight: 900; }
-        .header-top h1 span { color: var(--accent); }
-        
-        .cub-box { text-align: right; }
-        .cub-box small { font-size: 10px; color: #8b949e; font-weight: 700; }
-        .cub-box b { display: block; font-size: 1.2rem; color: var(--green); }
-
-        .data-panel { 
-            background: var(--panel); 
-            border: 1px solid var(--border); 
-            border-radius: 12px; 
-            display: flex; 
-            flex-direction: column; 
-            flex: 1; 
-            overflow: hidden; 
-        }
-        
-        .panel-title { padding: 15px 20px; background: rgba(255,255,255,0.01); border-bottom: 1px solid var(--border); font-size: 0.85rem; font-weight: 800; color: var(--accent); }
-
-        .table-wrapper { flex: 1; overflow: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { position: sticky; top: 0; background: #161b22; padding: 12px 8px; font-size: 10px; color: #8b949e; text-transform: uppercase; z-index: 2; border-bottom: 1px solid var(--border); }
-        td { padding: 12px 8px; font-size: 12px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center; }
-
-        /* --- FILA LATERAL --- */
-        .right-aside { 
-            width: 280px; 
-            padding: 20px 20px 20px 0; 
-            flex-shrink: 0; 
-            display: flex; 
-            flex-direction: column; 
-        }
-        .queue-card { height: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-        .queue-card .panel-title { color: var(--yellow); }
-
-        /* --- RESPONSIVIDADE (MOBILE) --- */
+        /* Responsividade para Celular */
         @media (max-width: 1024px) {
-            .dashboard-container { flex-direction: column; height: auto; overflow: visible; }
-            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); flex-direction: row; flex-wrap: wrap; justify-content: space-around; }
-            .indicator-card { width: 45%; margin-bottom: 15px; }
-            .right-aside { width: 100%; padding: 20px; }
-            .main-content { height: 600px; } /* Altura fixa para scroll interno no mobile */
+            .dashboard {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 500px auto;
+                overflow-y: auto;
+                height: auto;
+            }
+            .sidebar { flex-direction: row; flex-wrap: wrap; gap: 20px; }
+            .indicator { width: 45%; }
+            .main-panel, .right-panel { height: 500px; }
         }
 
-        @media (max-width: 600px) {
-            .header-top { flex-direction: column; align-items: flex-start; }
-            .indicator-card { width: 100%; }
-        }
-
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 9px; font-weight: 800; border: 1px solid currentColor; text-transform: uppercase; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; border: 1px solid currentColor; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
+    <div class="dashboard">
+        <header class="header">
+            <h1>EXPEDIÇÃO <span>CD-84</span></h1>
+            <div style="text-align: right">
+                <small style="color:#8b949e; font-weight:700">CUBAGEM TOTAL</small>
+                <b id="total_cub" style="display:block; color:var(--green); font-size:1.4rem">0,000 m³</b>
+            </div>
+        </header>
+
         <aside class="sidebar">
-            <div class="brand">CD-84 MATEUS</div>
-            
-            <div class="indicator-card">
-                <div class="progress-ring">
-                    <svg><circle class="circle-bg" cx="60" cy="60" r="55"></circle><circle class="circle-bar" id="bar_dia" cx="60" cy="60" r="55"></circle></svg>
-                    <div class="percentage" id="perc_dia">0%</div>
+            <div class="indicator">
+                <div class="ring-container">
+                    <svg><circle class="c-bg" cx="70" cy="70" r="65"></circle><circle class="c-bar" id="b_dia" cx="70" cy="70" r="65"></circle></svg>
+                    <div class="perc-txt" id="p_dia">0%</div>
                 </div>
-                <p class="indicator-label">Faturamento Hoje</p>
-                <div class="indicator-value" id="val_dia">R$ 0,00</div>
+                <p class="ind-label">Hoje</p>
+                <div class="ind-val" id="v_dia">R$ 0,00</div>
             </div>
 
-            <div class="indicator-card">
-                <div class="progress-ring">
-                    <svg><circle class="circle-bg" cx="60" cy="60" r="55"></circle><circle class="circle-bar" id="bar_mes" cx="60" cy="60" r="55"></circle></svg>
-                    <div class="percentage" id="perc_mes">0%</div>
+            <div class="indicator">
+                <div class="ring-container">
+                    <svg><circle class="c-bg" cx="70" cy="70" r="65"></circle><circle class="c-bar" id="b_mes" cx="70" cy="70" r="65"></circle></svg>
+                    <div class="perc-txt" id="p_mes">0%</div>
                 </div>
-                <p class="indicator-label">Meta Mensal (21M)</p>
-                <div class="indicator-value" id="val_mes">R$ 0,00</div>
+                <p class="ind-label">Mensal (21M)</p>
+                <div class="ind-val" id="v_mes">R$ 0,00</div>
             </div>
         </aside>
 
-        <main class="main-content">
-            <div class="header-top">
-                <h1>Painel de <span>Expedição</span></h1>
-                <div class="cub-box">
-                    <small>CUBAGEM TOTAL CARREGADA</small>
-                    <b id="txt_cub_total">0,000 m³</b>
-                </div>
+        <main class="main-panel">
+            <div class="panel-title">CONTROLE DE CARREGAMENTOS</div>
+            <div class="scroll-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Filial</th>
+                            <th>Doca</th>
+                            <th>Valor</th>
+                            <th>Veículo</th>
+                            <th>Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaPedidos"></tbody>
+                </table>
             </div>
-
-            <section class="data-panel">
-                <div class="panel-title">PEDIDOS EM CARREGAMENTO</div>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tipo</th>
-                                <th>Filial</th>
-                                <th>Doca</th>
-                                <th>Valor</th>
-                                <th>Veículo</th>
-                                <th>Horário</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaPedidos"></tbody>
-                    </table>
-                </div>
-            </section>
         </main>
 
-        <aside class="right-aside">
-            <div class="queue-card">
-                <div class="panel-title">FILA DE PÁTIO</div>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 25%">Vez</th>
-                                <th style="width: 45%">Placa</th>
-                                <th style="width: 30%">Cub.</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaFila"></tbody>
-                    </table>
-                </div>
+        <aside class="right-panel">
+            <div class="panel-title">FILA DE PÁTIO</div>
+            <div class="scroll-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Vez</th>
+                            <th>Placa</th>
+                            <th>Cub.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaFila"></tbody>
+                </table>
             </div>
         </aside>
     </div>
 
     <script>
-        const ENDPOINT = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
+        const API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
 
-        function getColor(p) {
-            if (p < 50) return "#da3633";
-            if (p < 90) return "#d29922";
-            return "#3fb950";
-        }
-
-        function updateCircle(idBar, idPerc, idVal, percent, valStr) {
-            const circle = document.getElementById(idBar);
-            const circ = 2 * Math.PI * 55;
+        function updateRing(barId, percId, valId, percent, valStr) {
+            const bar = document.getElementById(barId);
+            const circ = 2 * Math.PI * 65;
             const offset = circ - (percent / 100 * circ);
-            const color = getColor(percent);
+            const color = percent < 50 ? "#da3633" : percent < 90 ? "#d29922" : "#3fb950";
 
-            circle.style.strokeDasharray = circ;
-            circle.style.strokeDashoffset = offset;
-            circle.style.stroke = color;
+            bar.style.strokeDasharray = circ;
+            bar.style.strokeDashoffset = offset;
+            bar.style.stroke = color;
 
-            document.getElementById(idPerc).innerText = Math.round(percent) + "%";
-            document.getElementById(idPerc).style.color = color;
-            document.getElementById(idVal).innerText = valStr;
-            document.getElementById(idVal).style.color = color;
+            document.getElementById(percId).innerText = Math.round(percent) + "%";
+            document.getElementById(percId).style.color = color;
+            document.getElementById(valId).innerText = valStr;
+            document.getElementById(valId).style.color = color;
         }
 
-        async function refresh() {
+        async function sync() {
             try {
-                const r = await fetch(ENDPOINT);
+                const r = await fetch(API);
                 const d = await r.json();
 
+                // Metas
                 if(d.faturamento) {
                     let v = parseFloat(d.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
-                    updateCircle('bar_dia', 'perc_dia', 'val_dia', Math.min((v/954545)*100, 100), d.faturamento);
+                    updateRing('b_dia', 'p_dia', 'v_dia', Math.min((v/954545)*100, 100), d.faturamento);
                 }
-
                 if(d.faturamentoMes) {
                     let vm = parseFloat(d.faturamentoMes.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
-                    updateCircle('bar_mes', 'perc_mes', 'val_mes', Math.min((vm/21000000)*100, 100), d.faturamentoMes);
+                    updateRing('b_mes', 'p_mes', 'v_mes', Math.min((vm/21000000)*100, 100), d.faturamentoMes);
                 }
 
-                // Tabela Pedidos
+                // Pedidos
                 document.getElementById('listaPedidos').innerHTML = d.veiculos.filter(v => v.doca && v.tipo).map(v => {
                     let c = v.tipo.includes("ABASTECIMENTO") ? "#f39c12" : v.tipo.includes("ELETRO") ? "#2ecc71" : "#da3633";
                     return `<tr>
@@ -255,19 +238,19 @@
                 // Fila
                 document.getElementById('listaFila').innerHTML = d.veiculos.filter(v => v.vez || v.patio).map(v => `
                     <tr>
-                        <td style="color:var(--yellow); font-size:16px">${v.vez || '--'}</td>
+                        <td style="color:var(--yellow); font-size:1.2rem">${v.vez || '--'}</td>
                         <td style="color:var(--accent)">${v.patio || v.veiculos || '---'}</td>
                         <td style="color:#666">${v.cubagem || '0m³'}</td>
                     </tr>
                 `).join('');
 
-                document.getElementById('txt_cub_total').innerText = "620.534 m³";
+                document.getElementById('total_cub').innerText = "620.534 m³";
 
-            } catch (e) { console.error("Erro de sincronização", e); }
+            } catch (e) { console.error("Erro:", e); }
         }
 
-        refresh();
-        setInterval(refresh, 15000);
+        sync();
+        setInterval(sync, 15000);
     </script>
 </body>
 </html>
