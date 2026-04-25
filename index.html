@@ -24,20 +24,20 @@
             color: var(--text); 
             height: 100vh; 
             width: 100vw;
-            overflow: hidden; /* Impede scroll na página inteira */
+            overflow: hidden; 
         }
 
-        /* Layout em Grade Principal */
+        /* Grid Principal Otimizado */
         .dashboard {
             display: grid;
-            grid-template-columns: 260px 1fr 300px;
-            grid-template-rows: 80px 1fr;
+            grid-template-columns: 180px 1fr 280px; /* Sidebar mais estreita para ganhar espaço central */
+            grid-template-rows: 70px 1fr;
             height: 100vh;
             gap: 10px;
             padding: 10px;
         }
 
-        /* Cabeçalho Superior */
+        /* Cabeçalho */
         .header {
             grid-column: 1 / -1;
             background: var(--panel);
@@ -45,37 +45,38 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 25px;
+            padding: 0 20px;
             border: 1px solid var(--border);
         }
 
-        .header h1 { font-size: clamp(1.2rem, 2vw, 1.8rem); font-weight: 900; }
+        .header h1 { font-size: 1.4rem; font-weight: 900; }
         .header h1 span { color: var(--accent); }
 
-        /* Coluna Lateral: Indicadores */
+        /* --- SIDEBAR VERTICAL (Medidores um sobre o outro) --- */
         .sidebar {
             grid-row: 2;
             background: var(--panel);
             border-radius: 12px;
             border: 1px solid var(--border);
             display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            padding: 20px;
+            flex-direction: column; /* Empilhamento Vertical */
+            justify-content: center;
+            gap: 30px;
+            padding: 15px;
         }
 
-        .indicator { text-align: center; }
-        .ring-container { position: relative; width: 140px; height: 140px; margin: 0 auto; }
-        svg { transform: rotate(-90deg); width: 140px; height: 140px; }
-        circle { fill: none; stroke-width: 12; stroke-linecap: round; }
+        .indicator { text-align: center; width: 100%; }
+        .ring-container { position: relative; width: 120px; height: 120px; margin: 0 auto; }
+        svg { transform: rotate(-90deg); width: 120px; height: 120px; }
+        circle { fill: none; stroke-width: 10; stroke-linecap: round; }
         .c-bg { stroke: rgba(255,255,255,0.05); }
-        .c-bar { stroke-dasharray: 440; stroke-dashoffset: 440; transition: 1s ease; }
+        .c-bar { stroke-dasharray: 377; stroke-dashoffset: 377; transition: 1s ease; }
         
-        .perc-txt { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; font-weight: 900; }
-        .ind-label { font-size: 11px; font-weight: 700; color: #8b949e; text-transform: uppercase; margin-top: 10px; }
-        .ind-val { font-size: 1.1rem; font-weight: 800; margin-top: 5px; }
+        .perc-txt { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2rem; font-weight: 900; }
+        .ind-label { font-size: 9px; font-weight: 700; color: #8b949e; text-transform: uppercase; margin-top: 8px; }
+        .ind-val { font-size: 0.9rem; font-weight: 800; margin-top: 4px; }
 
-        /* Painel Central: Tabela Principal */
+        /* Painel Central: Pedidos */
         .main-panel {
             grid-row: 2;
             background: var(--panel);
@@ -86,12 +87,12 @@
             overflow: hidden;
         }
 
-        .panel-title { padding: 15px; font-size: 0.9rem; font-weight: 800; border-bottom: 1px solid var(--border); color: var(--accent); background: rgba(255,255,255,0.02); }
+        .panel-title { padding: 12px 15px; font-size: 0.85rem; font-weight: 800; border-bottom: 1px solid var(--border); color: var(--accent); background: rgba(255,255,255,0.02); }
 
         .scroll-area { flex: 1; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; text-align: center; }
-        th { position: sticky; top: 0; background: #161b22; padding: 15px 5px; font-size: 11px; color: #8b949e; text-transform: uppercase; z-index: 10; border-bottom: 2px solid var(--border); }
-        td { padding: 14px 5px; font-size: 13px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        th { position: sticky; top: 0; background: #161b22; padding: 12px 5px; font-size: 10px; color: #8b949e; text-transform: uppercase; z-index: 10; border-bottom: 2px solid var(--border); }
+        td { padding: 12px 5px; font-size: 12px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.03); }
 
         /* Fila Lateral */
         .right-panel {
@@ -105,20 +106,20 @@
         }
         .right-panel .panel-title { color: var(--yellow); }
 
-        /* Responsividade para Celular */
+        /* Responsividade Celular */
         @media (max-width: 1024px) {
             .dashboard {
                 grid-template-columns: 1fr;
-                grid-template-rows: auto auto 500px auto;
-                overflow-y: auto;
+                grid-template-rows: auto auto 1fr auto;
                 height: auto;
+                overflow-y: auto;
             }
-            .sidebar { flex-direction: row; flex-wrap: wrap; gap: 20px; }
+            .sidebar { flex-direction: row; height: auto; }
             .indicator { width: 45%; }
             .main-panel, .right-panel { height: 500px; }
         }
 
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; border: 1px solid currentColor; text-transform: uppercase; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 9px; border: 1px solid currentColor; text-transform: uppercase; font-weight: 800; }
     </style>
 </head>
 <body>
@@ -127,33 +128,33 @@
         <header class="header">
             <h1>EXPEDIÇÃO <span>CD-84</span></h1>
             <div style="text-align: right">
-                <small style="color:#8b949e; font-weight:700">CUBAGEM TOTAL</small>
-                <b id="total_cub" style="display:block; color:var(--green); font-size:1.4rem">0,000 m³</b>
+                <small style="color:#8b949e; font-weight:700">CUBAGEM CARREGADA</small>
+                <b id="total_cub" style="display:block; color:var(--green); font-size:1.2rem">0,000 m³</b>
             </div>
         </header>
 
         <aside class="sidebar">
             <div class="indicator">
                 <div class="ring-container">
-                    <svg><circle class="c-bg" cx="70" cy="70" r="65"></circle><circle class="c-bar" id="b_dia" cx="70" cy="70" r="65"></circle></svg>
+                    <svg><circle class="c-bg" cx="60" cy="60" r="55"></circle><circle class="c-bar" id="b_dia" cx="60" cy="60" r="55"></circle></svg>
                     <div class="perc-txt" id="p_dia">0%</div>
                 </div>
-                <p class="ind-label">Hoje</p>
+                <p class="ind-label">Faturamento Hoje</p>
                 <div class="ind-val" id="v_dia">R$ 0,00</div>
             </div>
 
             <div class="indicator">
                 <div class="ring-container">
-                    <svg><circle class="c-bg" cx="70" cy="70" r="65"></circle><circle class="c-bar" id="b_mes" cx="70" cy="70" r="65"></circle></svg>
+                    <svg><circle class="c-bg" cx="60" cy="60" r="55"></circle><circle class="c-bar" id="b_mes" cx="60" cy="60" r="55"></circle></svg>
                     <div class="perc-txt" id="p_mes">0%</div>
                 </div>
-                <p class="ind-label">Mensal (21M)</p>
+                <p class="ind-label">Meta Mensal (21M)</p>
                 <div class="ind-val" id="v_mes">R$ 0,00</div>
             </div>
         </aside>
 
         <main class="main-panel">
-            <div class="panel-title">CONTROLE DE CARREGAMENTOS</div>
+            <div class="panel-title">PEDIDOS EM CARREGAMENTO ATIVO</div>
             <div class="scroll-area">
                 <table>
                     <thead>
@@ -163,7 +164,7 @@
                             <th>Doca</th>
                             <th>Valor</th>
                             <th>Veículo</th>
-                            <th>Hora</th>
+                            <th>Horário</th>
                         </tr>
                     </thead>
                     <tbody id="listaPedidos"></tbody>
@@ -189,11 +190,11 @@
     </div>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
 
         function updateRing(barId, percId, valId, percent, valStr) {
             const bar = document.getElementById(barId);
-            const circ = 2 * Math.PI * 65;
+            const circ = 2 * Math.PI * 55;
             const offset = circ - (percent / 100 * circ);
             const color = percent < 50 ? "#da3633" : percent < 90 ? "#d29922" : "#3fb950";
 
@@ -207,23 +208,23 @@
             document.getElementById(valId).style.color = color;
         }
 
-        async function sync() {
+        async function syncData() {
             try {
-                const r = await fetch(API);
-                const d = await r.json();
+                const response = await fetch(API_URL);
+                const data = await response.json();
 
-                // Metas
-                if(d.faturamento) {
-                    let v = parseFloat(d.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
-                    updateRing('b_dia', 'p_dia', 'v_dia', Math.min((v/954545)*100, 100), d.faturamento);
+                // Metas Diária e Mensal
+                if(data.faturamento) {
+                    let v = parseFloat(data.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+                    updateRing('b_dia', 'p_dia', 'v_dia', Math.min((v/954545)*100, 100), data.faturamento);
                 }
-                if(d.faturamentoMes) {
-                    let vm = parseFloat(d.faturamentoMes.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
-                    updateRing('b_mes', 'p_mes', 'v_mes', Math.min((vm/21000000)*100, 100), d.faturamentoMes);
+                if(data.faturamentoMes) {
+                    let vm = parseFloat(data.faturamentoMes.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+                    updateRing('b_mes', 'p_mes', 'v_mes', Math.min((vm/21000000)*100, 100), data.faturamentoMes);
                 }
 
-                // Pedidos
-                document.getElementById('listaPedidos').innerHTML = d.veiculos.filter(v => v.doca && v.tipo).map(v => {
+                // Tabela de Pedidos
+                document.getElementById('listaPedidos').innerHTML = data.veiculos.filter(v => v.doca && v.tipo).map(v => {
                     let c = v.tipo.includes("ABASTECIMENTO") ? "#f39c12" : v.tipo.includes("ELETRO") ? "#2ecc71" : "#da3633";
                     return `<tr>
                         <td><span class="badge" style="color:${c}">${v.tipo}</span></td>
@@ -235,10 +236,10 @@
                     </tr>`;
                 }).join('');
 
-                // Fila
-                document.getElementById('listaFila').innerHTML = d.veiculos.filter(v => v.vez || v.patio).map(v => `
+                // Fila de Pátio
+                document.getElementById('listaFila').innerHTML = data.veiculos.filter(v => v.vez || v.patio).map(v => `
                     <tr>
-                        <td style="color:var(--yellow); font-size:1.2rem">${v.vez || '--'}</td>
+                        <td style="color:var(--yellow); font-size:1.1rem">${v.vez || '--'}</td>
                         <td style="color:var(--accent)">${v.patio || v.veiculos || '---'}</td>
                         <td style="color:#666">${v.cubagem || '0m³'}</td>
                     </tr>
@@ -246,11 +247,11 @@
 
                 document.getElementById('total_cub').innerText = "620.534 m³";
 
-            } catch (e) { console.error("Erro:", e); }
+            } catch (error) { console.error("Erro na sincronização:", error); }
         }
 
-        sync();
-        setInterval(sync, 15000);
+        syncData();
+        setInterval(syncData, 15000);
     </script>
 </body>
 </html>
