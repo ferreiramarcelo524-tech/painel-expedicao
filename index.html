@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA EXPEDIÇÃO CD-84</title>
+    <title>CONTROLE EXPEDIÇÃO CD-84</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -23,21 +23,20 @@
             background: var(--bg); 
             color: var(--text); 
             height: 100vh; 
-            width: 100vw;
             overflow: hidden; 
         }
 
-        /* Grid Principal Otimizado */
+        /* GRID PRINCIPAL */
         .dashboard {
             display: grid;
-            grid-template-columns: 180px 1fr 280px; /* Sidebar mais estreita para ganhar espaço central */
+            grid-template-columns: 200px 1fr 300px; /* Sidebar fixa em 200px */
             grid-template-rows: 70px 1fr;
             height: 100vh;
             gap: 10px;
             padding: 10px;
         }
 
-        /* Cabeçalho */
+        /* CABEÇALHO */
         .header {
             grid-column: 1 / -1;
             background: var(--panel);
@@ -48,35 +47,35 @@
             padding: 0 20px;
             border: 1px solid var(--border);
         }
-
         .header h1 { font-size: 1.4rem; font-weight: 900; }
         .header h1 span { color: var(--accent); }
 
-        /* --- SIDEBAR VERTICAL (Medidores um sobre o outro) --- */
+        /* SIDEBAR VERTICAL (MEDIDORES EMPILHADOS) */
         .sidebar {
             grid-row: 2;
             background: var(--panel);
             border-radius: 12px;
             border: 1px solid var(--border);
             display: flex;
-            flex-direction: column; /* Empilhamento Vertical */
-            justify-content: center;
-            gap: 30px;
-            padding: 15px;
+            flex-direction: column; /* FORÇA UM EM CIMA DO OUTRO */
+            align-items: center;
+            justify-content: flex-start;
+            padding: 30px 10px;
+            gap: 50px; /* Espaço entre os dois medidores */
         }
 
-        .indicator { text-align: center; width: 100%; }
-        .ring-container { position: relative; width: 120px; height: 120px; margin: 0 auto; }
-        svg { transform: rotate(-90deg); width: 120px; height: 120px; }
-        circle { fill: none; stroke-width: 10; stroke-linecap: round; }
+        .indicator { width: 100%; text-align: center; }
+        .ring-container { position: relative; width: 130px; height: 130px; margin: 0 auto; }
+        svg { transform: rotate(-90deg); width: 130px; height: 130px; }
+        circle { fill: none; stroke-width: 12; stroke-linecap: round; }
         .c-bg { stroke: rgba(255,255,255,0.05); }
-        .c-bar { stroke-dasharray: 377; stroke-dashoffset: 377; transition: 1s ease; }
+        .c-bar { stroke-dasharray: 345; stroke-dashoffset: 345; transition: stroke-dashoffset 1s ease, stroke 0.5s ease; }
         
-        .perc-txt { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2rem; font-weight: 900; }
-        .ind-label { font-size: 9px; font-weight: 700; color: #8b949e; text-transform: uppercase; margin-top: 8px; }
-        .ind-val { font-size: 0.9rem; font-weight: 800; margin-top: 4px; }
+        .perc-txt { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.4rem; font-weight: 900; }
+        .ind-label { font-size: 10px; font-weight: 700; color: #8b949e; text-transform: uppercase; margin-top: 10px; }
+        .ind-val { font-size: 1rem; font-weight: 800; margin-top: 5px; word-break: break-all; }
 
-        /* Painel Central: Pedidos */
+        /* PAINEL CENTRAL */
         .main-panel {
             grid-row: 2;
             background: var(--panel);
@@ -86,15 +85,14 @@
             flex-direction: column;
             overflow: hidden;
         }
-
         .panel-title { padding: 12px 15px; font-size: 0.85rem; font-weight: 800; border-bottom: 1px solid var(--border); color: var(--accent); background: rgba(255,255,255,0.02); }
-
         .scroll-area { flex: 1; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: center; }
+        
+        table { width: 100%; border-collapse: collapse; }
         th { position: sticky; top: 0; background: #161b22; padding: 12px 5px; font-size: 10px; color: #8b949e; text-transform: uppercase; z-index: 10; border-bottom: 2px solid var(--border); }
-        td { padding: 12px 5px; font-size: 12px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        td { padding: 14px 5px; font-size: 12.5px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center; }
 
-        /* Fila Lateral */
+        /* PAINEL DIREITO */
         .right-panel {
             grid-row: 2;
             background: var(--panel);
@@ -106,20 +104,20 @@
         }
         .right-panel .panel-title { color: var(--yellow); }
 
-        /* Responsividade Celular */
+        /* RESPONSIVIDADE CELULAR */
         @media (max-width: 1024px) {
             .dashboard {
                 grid-template-columns: 1fr;
                 grid-template-rows: auto auto 1fr auto;
-                height: auto;
+                height: 100vh;
                 overflow-y: auto;
             }
-            .sidebar { flex-direction: row; height: auto; }
+            .sidebar { flex-direction: row; justify-content: space-around; padding: 20px; }
             .indicator { width: 45%; }
-            .main-panel, .right-panel { height: 500px; }
+            .main-panel, .right-panel { height: 500px; overflow: hidden; }
         }
 
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 9px; border: 1px solid currentColor; text-transform: uppercase; font-weight: 800; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 9px; border: 1px solid currentColor; font-weight: 800; }
     </style>
 </head>
 <body>
@@ -128,38 +126,38 @@
         <header class="header">
             <h1>EXPEDIÇÃO <span>CD-84</span></h1>
             <div style="text-align: right">
-                <small style="color:#8b949e; font-weight:700">CUBAGEM CARREGADA</small>
-                <b id="total_cub" style="display:block; color:var(--green); font-size:1.2rem">0,000 m³</b>
+                <small style="color:#8b949e; font-weight:700">CUBAGEM TOTAL</small>
+                <b id="total_cub" style="display:block; color:var(--green); font-size:1.3rem">0,000 m³</b>
             </div>
         </header>
 
         <aside class="sidebar">
             <div class="indicator">
                 <div class="ring-container">
-                    <svg><circle class="c-bg" cx="60" cy="60" r="55"></circle><circle class="c-bar" id="b_dia" cx="60" cy="60" r="55"></circle></svg>
-                    <div class="perc-txt" id="p_dia">0%</div>
+                    <svg><circle class="c-bg" cx="65" cy="65" r="55"></circle><circle class="c-bar" id="barDia" cx="65" cy="65" r="55"></circle></svg>
+                    <div class="perc-txt" id="txtPercDia">0%</div>
                 </div>
                 <p class="ind-label">Faturamento Hoje</p>
-                <div class="ind-val" id="v_dia">R$ 0,00</div>
+                <div class="ind-val" id="txtValDia">R$ 0,00</div>
             </div>
 
             <div class="indicator">
                 <div class="ring-container">
-                    <svg><circle class="c-bg" cx="60" cy="60" r="55"></circle><circle class="c-bar" id="b_mes" cx="60" cy="60" r="55"></circle></svg>
-                    <div class="perc-txt" id="p_mes">0%</div>
+                    <svg><circle class="c-bg" cx="65" cy="65" r="55"></circle><circle class="c-bar" id="barMes" cx="65" cy="65" r="55"></circle></svg>
+                    <div class="perc-txt" id="txtPercMes">0%</div>
                 </div>
-                <p class="ind-label">Meta Mensal (21M)</p>
-                <div class="ind-val" id="v_mes">R$ 0,00</div>
+                <p class="ind-label">Faturamento Mês</p>
+                <div class="ind-val" id="txtValMes">R$ 0,00</div>
             </div>
         </aside>
 
         <main class="main-panel">
-            <div class="panel-title">PEDIDOS EM CARREGAMENTO ATIVO</div>
+            <div class="panel-title">PEDIDOS EM CARREGAMENTO</div>
             <div class="scroll-area">
                 <table>
                     <thead>
                         <tr>
-                            <th>Tipo</th>
+                            <th>Setor</th>
                             <th>Filial</th>
                             <th>Doca</th>
                             <th>Valor</th>
@@ -167,34 +165,34 @@
                             <th>Horário</th>
                         </tr>
                     </thead>
-                    <tbody id="listaPedidos"></tbody>
+                    <tbody id="corpoPedidos"></tbody>
                 </table>
             </div>
         </main>
 
         <aside class="right-panel">
-            <div class="panel-title">FILA DE PÁTIO</div>
+            <div class="panel-title">ORDEM DE CHEGADA</div>
             <div class="scroll-area">
                 <table>
                     <thead>
                         <tr>
-                            <th>Vez</th>
-                            <th>Placa</th>
-                            <th>Cub.</th>
+                            <th style="width: 20%">Vez</th>
+                            <th style="width: 50%">Placa</th>
+                            <th style="width: 30%">Cub.</th>
                         </tr>
                     </thead>
-                    <tbody id="listaFila"></tbody>
+                    <tbody id="corpoFila"></tbody>
                 </table>
             </div>
         </aside>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
+        const API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
 
-        function updateRing(barId, percId, valId, percent, valStr) {
-            const bar = document.getElementById(barId);
-            const circ = 2 * Math.PI * 55;
+        function updateGauge(idBar, idPerc, idVal, percent, valStr) {
+            const bar = document.getElementById(idBar);
+            const circ = 2 * Math.PI * 55; // Circunferência para raio 55
             const offset = circ - (percent / 100 * circ);
             const color = percent < 50 ? "#da3633" : percent < 90 ? "#d29922" : "#3fb950";
 
@@ -202,32 +200,32 @@
             bar.style.strokeDashoffset = offset;
             bar.style.stroke = color;
 
-            document.getElementById(percId).innerText = Math.round(percent) + "%";
-            document.getElementById(percId).style.color = color;
-            document.getElementById(valId).innerText = valStr;
-            document.getElementById(valId).style.color = color;
+            document.getElementById(idPerc).innerText = Math.round(percent) + "%";
+            document.getElementById(idPerc).style.color = color;
+            document.getElementById(idVal).innerText = valStr;
+            document.getElementById(idVal).style.color = color;
         }
 
-        async function syncData() {
+        async function refreshData() {
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(API);
                 const data = await response.json();
 
-                // Metas Diária e Mensal
+                // Metas com as cores que aproximam do verde
                 if(data.faturamento) {
                     let v = parseFloat(data.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
-                    updateRing('b_dia', 'p_dia', 'v_dia', Math.min((v/954545)*100, 100), data.faturamento);
+                    updateGauge('barDia', 'txtPercDia', 'txtValDia', Math.min((v/954545)*100, 100), data.faturamento);
                 }
                 if(data.faturamentoMes) {
                     let vm = parseFloat(data.faturamentoMes.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
-                    updateRing('b_mes', 'p_mes', 'v_mes', Math.min((vm/21000000)*100, 100), data.faturamentoMes);
+                    updateGauge('barMes', 'txtPercMes', 'txtValMes', Math.min((vm/21000000)*100, 100), data.faturamentoMes);
                 }
 
-                // Tabela de Pedidos
-                document.getElementById('listaPedidos').innerHTML = data.veiculos.filter(v => v.doca && v.tipo).map(v => {
-                    let c = v.tipo.includes("ABASTECIMENTO") ? "#f39c12" : v.tipo.includes("ELETRO") ? "#2ecc71" : "#da3633";
+                // Lista de Pedidos
+                document.getElementById('corpoPedidos').innerHTML = data.veiculos.filter(v => v.doca && v.tipo).map(v => {
+                    let cor = v.tipo.includes("ABASTECIMENTO") ? "#f39c12" : v.tipo.includes("ELETRO") ? "#2ecc71" : "#da3633";
                     return `<tr>
-                        <td><span class="badge" style="color:${c}">${v.tipo}</span></td>
+                        <td><span class="badge" style="color:${cor}">${v.tipo}</span></td>
                         <td>${v.filial}</td>
                         <td style="color:var(--yellow)">${v.doca}</td>
                         <td style="color:var(--green)">${v.valor}</td>
@@ -236,10 +234,10 @@
                     </tr>`;
                 }).join('');
 
-                // Fila de Pátio
-                document.getElementById('listaFila').innerHTML = data.veiculos.filter(v => v.vez || v.patio).map(v => `
+                // Fila
+                document.getElementById('corpoFila').innerHTML = data.veiculos.filter(v => v.vez || v.patio).map(v => `
                     <tr>
-                        <td style="color:var(--yellow); font-size:1.1rem">${v.vez || '--'}</td>
+                        <td style="color:var(--yellow); font-size:1.2rem">${v.vez || '--'}</td>
                         <td style="color:var(--accent)">${v.patio || v.veiculos || '---'}</td>
                         <td style="color:#666">${v.cubagem || '0m³'}</td>
                     </tr>
@@ -247,11 +245,11 @@
 
                 document.getElementById('total_cub').innerText = "620.534 m³";
 
-            } catch (error) { console.error("Erro na sincronização:", error); }
+            } catch (e) { console.error("Erro ao atualizar pedidos:", e); }
         }
 
-        syncData();
-        setInterval(syncData, 15000);
+        refreshData();
+        setInterval(refreshData, 15000);
     </script>
 </body>
 </html>
