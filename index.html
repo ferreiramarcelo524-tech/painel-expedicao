@@ -27,7 +27,6 @@
             overflow: hidden; 
         }
 
-        /* GRID: Sidebar Ultra Estreita (150px) para sobrar espaço pros pedidos */
         .dashboard {
             display: grid;
             grid-template-columns: 150px 1fr 260px; 
@@ -37,7 +36,6 @@
             padding: 8px;
         }
 
-        /* CABEÇALHO COMPACTO */
         .header {
             grid-column: 1 / -1;
             background: var(--panel);
@@ -45,13 +43,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 15px;
+            padding: 0 20px;
             border: 1px solid var(--border);
         }
         .header h1 { font-size: 1.2rem; font-weight: 900; }
         .header h1 span { color: var(--accent); }
 
-        /* SIDEBAR VERTICAL - UM EM CIMA DO OUTRO OBRIGATORIAMENTE */
+        #clock-container { text-align: right; }
+        #clock-time { display: block; font-size: 1.3rem; font-weight: 900; color: var(--accent); line-height: 1; }
+        #clock-date { font-size: 0.65rem; color: #8b949e; text-transform: uppercase; }
+
         .sidebar {
             grid-row: 2;
             background: var(--panel);
@@ -76,7 +77,6 @@
         .ind-label { font-size: 8px; font-weight: 700; color: #8b949e; text-transform: uppercase; margin-top: 5px; }
         .ind-val { font-size: 0.85rem; font-weight: 800; margin-top: 2px; }
 
-        /* PAINEL CENTRAL - FOCO EM MAIS LINHAS */
         .main-panel {
             grid-row: 2;
             background: var(--panel);
@@ -87,15 +87,12 @@
             overflow: hidden;
         }
         .panel-title { padding: 8px 12px; font-size: 0.75rem; font-weight: 800; border-bottom: 1px solid var(--border); color: var(--accent); background: rgba(255,255,255,0.02); }
-        
         .scroll-area { flex: 1; overflow-y: auto; }
         
-        /* TABELA SUPER COMPACTA */
         table { width: 100%; border-collapse: collapse; }
         th { position: sticky; top: 0; background: #161b22; padding: 8px 4px; font-size: 9px; color: #8b949e; text-transform: uppercase; z-index: 10; border-bottom: 2px solid var(--border); }
         td { padding: 6px 4px; font-size: 11px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center; line-height: 1.1; }
 
-        /* FILA LATERAL */
         .right-panel {
             grid-row: 2;
             background: var(--panel);
@@ -106,16 +103,7 @@
             overflow: hidden;
         }
         .right-panel .panel-title { color: var(--yellow); }
-
         .badge { padding: 2px 5px; border-radius: 3px; font-size: 8px; border: 1px solid currentColor; font-weight: 800; }
-
-        /* MOBILE FIX */
-        @media (max-width: 800px) {
-            .dashboard { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr auto; height: auto; overflow-y: auto; }
-            .sidebar { flex-direction: row; height: auto; padding: 10px; gap: 10px; }
-            .indicator { width: 48%; }
-            .main-panel, .right-panel { height: 400px; }
-        }
     </style>
 </head>
 <body>
@@ -123,8 +111,9 @@
     <div class="dashboard">
         <header class="header">
             <h1>EXPEDIÇÃO <span>CD-84</span></h1>
-            <div style="text-align: right">
-                
+            <div id="clock-container">
+                <span id="clock-date">--/--/----</span>
+                <span id="clock-time">00:00:00</span>
             </div>
         </header>
 
@@ -187,16 +176,22 @@
     <script>
         const API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
 
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock-time').textContent = now.toLocaleTimeString('pt-br');
+            document.getElementById('clock-date').textContent = now.toLocaleDateString('pt-br', { weekday: 'short', day: '2-digit', month: 'short' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
         function updateRing(barId, percId, valId, percent, valStr) {
             const bar = document.getElementById(barId);
             const circ = 2 * Math.PI * 50; 
             const offset = circ - (percent / 100 * circ);
             const color = percent < 50 ? "#da3633" : percent < 90 ? "#d29922" : "#3fb950";
-
             bar.style.strokeDasharray = circ;
             bar.style.strokeDashoffset = offset;
             bar.style.stroke = color;
-
             document.getElementById(percId).innerText = Math.round(percent) + "%";
             document.getElementById(percId).style.color = color;
             document.getElementById(valId).innerText = valStr;
@@ -208,6 +203,7 @@
                 const r = await fetch(API);
                 const d = await r.json();
 
+                // Faturamento
                 if(d.faturamento) {
                     let v = parseFloat(d.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
                     updateRing('bDia', 'pDia', 'vDia', Math.min((v/954545)*100, 100), d.faturamento);
@@ -217,30 +213,42 @@
                     updateRing('bMes', 'pMes', 'vMes', Math.min((vm/21000000)*100, 100), d.faturamentoMes);
                 }
 
-                // Tabela Pedidos - Máxima Densidade
-                document.getElementById('corpoPedidos').innerHTML = d.veiculos.filter(v => v.doca && v.tipo).map(v => {
-                    let c = v.tipo.includes("ABASTECIMENTO") ? "#f39c12" : v.tipo.includes("ELETRO") ? "#2ecc71" : "#da3633";
+                // PEDIDOS EM CARREGAMENTO (Quem tem Doca)
+                const emCarregamento = d.veiculos.filter(v => {
+                    const doca = String(v.doca || "").trim();
+                    return doca !== "" && doca !== "0" && doca !== "---";
+                });
+
+                document.getElementById('corpoPedidos').innerHTML = emCarregamento.map(v => {
+                    const tipo = v.tipo || v.setor || "---";
+                    const corSetor = tipo.includes("ABASTECIMENTO") ? "#f39c12" : tipo.includes("ELETRO") ? "#2ecc71" : "#da3633";
                     return `<tr>
-                        <td><span class="badge" style="color:${c}">${v.tipo}</span></td>
-                        <td>${v.filial}</td>
+                        <td><span class="badge" style="color:${corSetor}">${tipo}</span></td>
+                        <td>${v.filial || '---'}</td>
                         <td style="color:var(--yellow)">${v.doca}</td>
-                        <td style="color:var(--green)">${v.valor}</td>
+                        <td style="color:var(--green)">${v.valor || 'R$ 0,00'}</td>
                         <td>${v.veiculos || '---'}</td>
-                        <td style="color:#555; font-size:9px">${v.data}</td>
+                        <td style="color:#555; font-size:9px">${v.data || '---'}</td>
                     </tr>`;
                 }).join('');
 
-                // Fila
-                document.getElementById('corpoFila').innerHTML = d.veiculos.filter(v => v.vez || v.patio).map(v => `
+                // ORDEM DE CHEGADA (Quem NÃO tem Doca e tem alguma identificação)
+                const naFila = d.veiculos.filter(v => {
+                    const doca = String(v.doca || "").trim();
+                    const semDoca = (doca === "" || doca === "0" || doca === "---");
+                    const temInfo = (v.veiculos || v.vez || v.Vez || v.patio || v.placa);
+                    return semDoca && temInfo;
+                });
+
+                document.getElementById('corpoFila').innerHTML = naFila.map(v => `
                     <tr>
-                        <td style="color:var(--yellow); font-size:1rem">${v.vez || '--'}</td>
-                        <td style="color:var(--accent)">${v.patio || v.veiculos || '---'}</td>
-                        <td style="color:#666">${v.cubagem || '0m³'}</td>
+                        <td style="color:var(--yellow); font-size:1rem">${v.vez || v.Vez || '--'}</td>
+                        <td style="color:var(--accent)">${v.veiculos || v.placa || v.patio || '---'}</td>
+                        <td style="color:#666">${v.cubagem || v.Cubagem || '0m³'}</td>
                     </tr>
                 `).join('');
 
-                
-            } catch (e) { console.error("Falha na atualização", e); }
+            } catch (e) { console.error("Erro na atualização", e); }
         }
 
         sync();
