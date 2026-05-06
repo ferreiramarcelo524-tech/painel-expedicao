@@ -14,7 +14,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
         
-        /* Estilo da Frase Animada */
         #meta-celebration {
             display: none;
             position: absolute;
@@ -65,15 +64,19 @@
 
         .main-panel, .right-panel { grid-row: 2; background: var(--panel); border-radius: 6px; border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
         .panel-title { padding: 8px 12px; font-size: 0.7rem; font-weight: 800; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); color: var(--accent); text-transform: uppercase; }
-        .scroll-area { flex: 1; overflow-y: auto; }
+        .scroll-area { flex: 1; overflow-y: auto; scroll-behavior: smooth; }
         
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         th { position: sticky; top: 0; background: #161b22; padding: 6px 4px; font-size: 9px; color: #8b949e; text-transform: uppercase; z-index: 10; border-bottom: 1px solid var(--border); }
         td { padding: 6px 4px; font-size: 12px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+        /* Estilos específicos da tabela de Pátio para espremer mais linhas */
+        .right-panel td { padding: 4px 4px; font-size: 11px; } 
+        .right-panel th { padding: 4px 4px; }
+
         .badge { padding: 3px 5px; border-radius: 3px; font-size: 9px; font-weight: 900; color: white; display: inline-block; width: 95%; text-transform: uppercase; }
-        .vez-col { color: var(--yellow); font-size: 13px !important; width: 45px; }
-        .placa-col { text-align: left !important; padding-left: 8px !important; color: #fff; font-size: 12px !important; }
+        .vez-col { color: var(--yellow); font-size: 11px !important; width: 45px; }
+        .placa-col { text-align: left !important; padding-left: 8px !important; color: #fff; font-size: 11px !important; }
         .doca-col { color: var(--yellow); font-size: 14px !important; font-weight: 900; }
         .valor-col { color: var(--green); font-size: 11px !important; }
 
@@ -129,7 +132,7 @@
 
         <aside class="right-panel">
             <div class="panel-title">Pátio / Fila</div>
-            <div class="scroll-area">
+            <div class="scroll-area" id="scrollPatio">
                 <table>
                     <colgroup><col width="45"><col width="100"><col></colgroup>
                     <thead><tr><th>Vez</th><th>Placa</th><th>Cub.</th></tr></thead>
@@ -141,6 +144,7 @@
 
     <script>
         const API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
+        let somTocado = false;
 
         function updateClock() {
             const now = new Date();
@@ -160,6 +164,20 @@
             document.getElementById(valId).innerText = valStr;
         }
 
+        // Sistema de Rolagem Automática para Fila Grande
+        function startAutoscroll() {
+            const container = document.getElementById('scrollPatio');
+            clearInterval(window.patioScrollInterval);
+            
+            window.patioScrollInterval = setInterval(() => {
+                if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
+                    container.scrollTop = 0; // Volta pro topo se chegou no fim
+                } else {
+                    container.scrollTop += 25; // Desce um pouco
+                }
+            }, 3000); // Executa a cada 3 segundos
+        }
+
         async function sync() {
             try {
                 const r = await fetch(API);
@@ -169,7 +187,6 @@
                     let v = parseFloat(d.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
                     updateRing('bDia', 'pDia', 'vDia', (v/954545)*100, d.faturamento);
 
-                    // VERIFICAÇÃO DA META (1 MILHÃO)
                     const celebrationEl = document.getElementById('meta-celebration');
                     if (v >= 1000000) {
                         celebrationEl.style.display = 'block';
@@ -221,6 +238,9 @@
 
                 document.getElementById('corpoPedidos').innerHTML = hP || "<tr><td colspan='5'>SEM CARREGAMENTOS</td></tr>";
                 document.getElementById('corpoFila').innerHTML = hF || "<tr><td colspan='3'>PÁTIO VAZIO</td></tr>";
+
+                // Inicia a rolagem se houver muitos registros
+                startAutoscroll();
 
             } catch (e) { console.error(e); }
         }
