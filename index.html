@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EXPEDIÇÃO CD-84 | MONITOR OFICIAL</title>
+    <title>EXPEDIÇÃO CD-84 | MONITOR TV 32"</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,55 +14,56 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
         
-        /* Ajuste de Dimensões das Colunas */
+        /* Layout Ajustado para TV 32" */
         .dashboard { 
             display: grid; 
-            grid-template-columns: 180px 1fr 320px; 
-            grid-template-rows: 60px 1fr; 
-            height: 100vh; gap: 8px; padding: 8px; 
+            grid-template-columns: 140px 1fr 240px; /* Redução da lateral e pátio para priorizar o centro */
+            grid-template-rows: 50px 1fr; 
+            height: 100vh; gap: 6px; padding: 6px; 
         }
         
-        .header { grid-column: 1 / -1; background: var(--panel); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; border: 1px solid var(--border); }
-        .header h1 { font-size: 1.3rem; font-weight: 900; }
+        .header { grid-column: 1 / -1; background: var(--panel); border-radius: 6px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border: 1px solid var(--border); }
+        .header h1 { font-size: 1.1rem; font-weight: 900; }
         .header h1 span { color: var(--accent); }
-        #clock-time { display: block; font-size: 1.4rem; font-weight: 900; color: var(--accent); text-align: right;}
-        #clock-date { font-size: 0.65rem; color: #8b949e; text-transform: uppercase; }
+        #clock-time { display: block; font-size: 1.2rem; font-weight: 900; color: var(--accent); }
+        #clock-date { font-size: 0.6rem; color: #8b949e; text-transform: uppercase; margin-right: 10px; }
 
-        .sidebar { grid-row: 2; background: var(--panel); border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 10px; gap: 40px; }
+        .sidebar { grid-row: 2; background: var(--panel); border-radius: 6px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 15px 5px; gap: 30px; }
         .indicator { width: 100%; text-align: center; }
-        .ring-container { position: relative; width: 110px; height: 110px; margin: 0 auto; }
-        svg { transform: rotate(-90deg); width: 110px; height: 110px; }
-        circle { fill: none; stroke-width: 10; stroke-linecap: round; }
+        .ring-container { position: relative; width: 90px; height: 90px; margin: 0 auto; }
+        svg { transform: rotate(-90deg); width: 90px; height: 90px; }
+        circle { fill: none; stroke-width: 8; stroke-linecap: round; }
         .c-bg { stroke: rgba(255,255,255,0.05); }
-        .c-bar { stroke-dasharray: 314; stroke-dashoffset: 314; transition: 1.5s ease; }
-        .perc-txt { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.2rem; font-weight: 900; }
-        .ind-label { font-size: 9px; font-weight: 700; color: #8b949e; text-transform: uppercase; margin-top: 6px; }
-        .ind-val { font-size: 0.9rem; font-weight: 800; margin-top: 3px; }
+        .c-bar { stroke-dasharray: 251; stroke-dashoffset: 251; transition: 1.5s ease; }
+        .perc-txt { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; font-weight: 900; }
+        .ind-label { font-size: 8px; font-weight: 700; color: #8b949e; text-transform: uppercase; margin-top: 5px; }
+        .ind-val { font-size: 0.75rem; font-weight: 800; margin-top: 2px; }
 
-        .main-panel, .right-panel { grid-row: 2; background: var(--panel); border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-        .panel-title { padding: 12px 15px; font-size: 0.8rem; font-weight: 800; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); color: var(--accent); }
+        .main-panel, .right-panel { grid-row: 2; background: var(--panel); border-radius: 6px; border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+        .panel-title { padding: 8px 12px; font-size: 0.7rem; font-weight: 800; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); color: var(--accent); text-transform: uppercase; }
         .scroll-area { flex: 1; overflow-y: auto; }
         
+        /* Tabela compacta para caber mais linhas */
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th { position: sticky; top: 0; background: #161b22; padding: 10px 5px; font-size: 10px; color: #8b949e; text-transform: uppercase; z-index: 10; border-bottom: 1px solid var(--border); }
-        td { padding: 10px 5px; font-size: 13px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        th { position: sticky; top: 0; background: #161b22; padding: 6px 4px; font-size: 9px; color: #8b949e; text-transform: uppercase; z-index: 10; border-bottom: 1px solid var(--border); }
+        td { padding: 6px 4px; font-size: 12px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Estilização de Badges e Colunas Específicas */
-        .badge { padding: 4px 6px; border-radius: 4px; font-size: 10px; font-weight: 800; color: white; display: inline-block; width: 100%; max-width: 120px; text-transform: uppercase; }
-        .vez-col { color: var(--yellow); font-size: 16px !important; width: 60px; font-weight: 900; }
-        .placa-col { text-align: left !important; padding-left: 15px !important; color: #fff; font-size: 14px !important; width: 140px; }
-        .doca-col { color: var(--yellow); font-size: 15px !important; }
-        .valor-col { color: var(--green); font-family: monospace; }
+        .badge { padding: 3px 5px; border-radius: 3px; font-size: 9px; font-weight: 900; color: white; display: inline-block; width: 95%; text-transform: uppercase; }
+        .vez-col { color: var(--yellow); font-size: 13px !important; width: 45px; }
+        .placa-col { text-align: left !important; padding-left: 8px !important; color: #fff; font-size: 12px !important; }
+        .doca-col { color: var(--yellow); font-size: 14px !important; font-weight: 900; }
+        .valor-col { color: var(--green); font-size: 11px !important; }
 
-        /* Cores dos Setores (Conforme solicitado) */
+        /* Cores Setores */
         .abastecimento { background-color: #f7e092; color: #5c4b14; }
-        .eletro { background-color: #0b723b; color: #fff; }
-        .mateus-plus { background-color: #a30000; color: #fff; }
-        .transferencia { background-color: #004d99; color: #fff; }
-        .retirada { background-color: #4b2c73; color: #fff; }
-        .almoxarifado { background-color: #733b00; color: #fff; }
-        .ponta-estoque { background-color: #b3d9ff; color: #004d99; }
-        .default-setor { background-color: #21262d; color: #c9d1d9; }
+        .eletro { background-color: #0b723b; }
+        .mateus-plus { background-color: #a30000; }
+        .transferencia { background-color: #004d99; }
+        .default-setor { background-color: #21262d; }
+
+        /* Scrollbar discreta */
+        .scroll-area::-webkit-scrollbar { width: 4px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -76,27 +77,27 @@
         <aside class="sidebar">
             <div class="indicator">
                 <div class="ring-container">
-                    <svg><circle class="c-bg" cx="55" cy="55" r="50"></circle><circle class="c-bar" id="bDia" cx="55" cy="55" r="50"></circle></svg>
+                    <svg><circle class="c-bg" cx="45" cy="45" r="40"></circle><circle class="c-bar" id="bDia" cx="45" cy="45" r="40"></circle></svg>
                     <div class="perc-txt" id="pDia">0%</div>
                 </div>
-                <p class="ind-label">Faturamento Hoje</p>
+                <p class="ind-label">Hoje</p>
                 <div class="ind-val" id="vDia">R$ 0,00</div>
             </div>
             <div class="indicator">
                 <div class="ring-container">
-                    <svg><circle class="c-bg" cx="55" cy="55" r="50"></circle><circle class="c-bar" id="bMes" cx="55" cy="55" r="50"></circle></svg>
+                    <svg><circle class="c-bg" cx="45" cy="45" r="40"></circle><circle class="c-bar" id="bMes" cx="45" cy="45" r="40"></circle></svg>
                     <div class="perc-txt" id="pMes">0%</div>
                 </div>
-                <p class="ind-label">Meta Mês (21M)</p>
+                <p class="ind-label">Mês (21M)</p>
                 <div class="ind-val" id="vMes">R$ 0,00</div>
             </div>
         </aside>
 
         <main class="main-panel">
-            <div class="panel-title">VEÍCULOS EM CARREGAMENTO</div>
+            <div class="panel-title">Carregamentos Ativos</div>
             <div class="scroll-area">
                 <table>
-                    <colgroup><col width="130"><col><col width="100"><col width="140"><col width="120"></colgroup>
+                    <colgroup><col width="100"><col><col width="80"><col width="110"><col width="90"></colgroup>
                     <thead><tr><th>Setor</th><th>Filial</th><th>Doca</th><th>Valor</th><th>Veículo</th></tr></thead>
                     <tbody id="corpoPedidos"></tbody>
                 </table>
@@ -104,10 +105,11 @@
         </main>
 
         <aside class="right-panel">
-            <div class="panel-title">ORDEM DE CHEGADA</div>
+            <div class="panel-title">Pátio / Fila</div>
             <div class="scroll-area">
                 <table>
-                    <thead><tr><th width="60">Vez</th><th width="140">Placa</th><th>Cubagem</th></tr></thead>
+                    <colgroup><col width="45"><col width="100"><col></colgroup>
+                    <thead><tr><th>Vez</th><th>Placa</th><th>Cub.</th></tr></thead>
                     <tbody id="corpoFila"></tbody>
                 </table>
             </div>
@@ -126,7 +128,7 @@
 
         function updateRing(barId, percId, valId, percent, valStr) {
             const bar = document.getElementById(barId);
-            const circ = 314; 
+            const circ = 251; 
             const offset = circ - (Math.min(percent, 100) / 100 * circ);
             bar.style.strokeDasharray = circ;
             bar.style.strokeDashoffset = offset;
@@ -165,9 +167,6 @@
                             else if(setor.includes("ELETRO")) cls="eletro";
                             else if(setor.includes("MATEUS")) cls="mateus-plus";
                             else if(setor.includes("TRANSF")) cls="transferencia";
-                            else if(setor.includes("RETIRADA")) cls="retirada";
-                            else if(setor.includes("ALMOX")) cls="almoxarifado";
-                            else if(setor.includes("PONTA")) cls="ponta-estoque";
 
                             hP += `<tr>
                                 <td><span class="badge ${cls}">${setor}</span></td>
@@ -182,14 +181,14 @@
                             hF += `<tr>
                                 <td class="vez-col">${vez}º</td>
                                 <td class="placa-col">${pPatio || '---'}</td>
-                                <td style="color:#8b949e">${v.cubagem || v.CUBAGEM || '---'}</td>
+                                <td style="font-size:10px; color:#8b949e">${v.cubagem || v.CUBAGEM || '---'}</td>
                             </tr>`;
                         }
                     });
                 }
 
-                document.getElementById('corpoPedidos').innerHTML = hP || "<tr><td colspan='5'>PÁTIO VAZIO</td></tr>";
-                document.getElementById('corpoFila').innerHTML = hF || "<tr><td colspan='3'>SEM VEÍCULOS NA FILA</td></tr>";
+                document.getElementById('corpoPedidos').innerHTML = hP || "<tr><td colspan='5'>SEM CARREGAMENTOS</td></tr>";
+                document.getElementById('corpoFila').innerHTML = hF || "<tr><td colspan='3'>PÁTIO VAZIO</td></tr>";
 
             } catch (e) { console.error(e); }
         }
