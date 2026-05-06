@@ -14,15 +14,39 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
         
-        /* Layout Ajustado para TV 32" */
+        /* Estilo da Frase Animada */
+        #meta-celebration {
+            display: none;
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            font-weight: 900;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: rainbow 1.5s linear infinite;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        @keyframes rainbow {
+            0% { color: #ff0000; }
+            20% { color: #ff00ff; }
+            40% { color: #0000ff; }
+            60% { color: #00ffff; }
+            80% { color: #00ff00; }
+            100% { color: #ffff00; }
+        }
+
         .dashboard { 
             display: grid; 
-            grid-template-columns: 140px 1fr 240px; /* Redução da lateral e pátio para priorizar o centro */
+            grid-template-columns: 140px 1fr 240px; 
             grid-template-rows: 50px 1fr; 
             height: 100vh; gap: 6px; padding: 6px; 
         }
         
-        .header { grid-column: 1 / -1; background: var(--panel); border-radius: 6px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border: 1px solid var(--border); }
+        .header { grid-column: 1 / -1; background: var(--panel); border-radius: 6px; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border: 1px solid var(--border); position: relative; }
         .header h1 { font-size: 1.1rem; font-weight: 900; }
         .header h1 span { color: var(--accent); }
         #clock-time { display: block; font-size: 1.2rem; font-weight: 900; color: var(--accent); }
@@ -43,7 +67,6 @@
         .panel-title { padding: 8px 12px; font-size: 0.7rem; font-weight: 800; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); color: var(--accent); text-transform: uppercase; }
         .scroll-area { flex: 1; overflow-y: auto; }
         
-        /* Tabela compacta para caber mais linhas */
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         th { position: sticky; top: 0; background: #161b22; padding: 6px 4px; font-size: 9px; color: #8b949e; text-transform: uppercase; z-index: 10; border-bottom: 1px solid var(--border); }
         td { padding: 6px 4px; font-size: 12px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -54,19 +77,19 @@
         .doca-col { color: var(--yellow); font-size: 14px !important; font-weight: 900; }
         .valor-col { color: var(--green); font-size: 11px !important; }
 
-        /* Cores Setores */
         .abastecimento { background-color: #f7e092; color: #5c4b14; }
         .eletro { background-color: #0b723b; }
         .mateus-plus { background-color: #a30000; }
         .transferencia { background-color: #004d99; }
         .default-setor { background-color: #21262d; }
 
-        /* Scrollbar discreta */
         .scroll-area::-webkit-scrollbar { width: 4px; }
         .scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
     </style>
 </head>
 <body>
+
+    <div id="meta-celebration">🚀 META DE 1 MILHÃO ATINGIDA! 🚀</div>
 
     <div class="dashboard">
         <header class="header">
@@ -145,7 +168,16 @@
                 if(d.faturamento) {
                     let v = parseFloat(d.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
                     updateRing('bDia', 'pDia', 'vDia', (v/954545)*100, d.faturamento);
+
+                    // VERIFICAÇÃO DA META (1 MILHÃO)
+                    const celebrationEl = document.getElementById('meta-celebration');
+                    if (v >= 1000000) {
+                        celebrationEl.style.display = 'block';
+                    } else {
+                        celebrationEl.style.display = 'none';
+                    }
                 }
+                
                 if(d.faturamentoMes) {
                     let vm = parseFloat(d.faturamentoMes.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
                     updateRing('bMes', 'pMes', 'vMes', (vm/21000000)*100, d.faturamentoMes);
