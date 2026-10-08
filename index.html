@@ -142,9 +142,64 @@
         </aside>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script>
         const API = "https://script.google.com/macros/s/AKfycbzqz9AHx8ahymUnlaIkmBLcXjDMXFRfB5pR9uyauFatDA2Y_tXZmdufL8AiU2m3MQdO1A/exec";
         let somTocado = false;
+
+        // ===== FILA DO APP (fila-portaria / Firestore) =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDv9K7VtXwe81eAzQteQb83IYkebPasgE",
+            authDomain: "expedicao-antifraud.firebaseapp.com",
+            projectId: "expedicao-antifraud",
+            storageBucket: "expedicao-antifraud.firebasestorage.app",
+            messagingSenderId: "683256630906",
+            appId: "1:683256630906:web:688866abf7f2d00e6eb5c3"
+        };
+        let sheetFila = [], cubMap = {}, appFila = null;
+        const normPlaca = p => String(p || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+        const limpa = t => String(t || "").replace(/[<>&"]/g, "");
+
+        function renderFila() {
+            let h = "";
+            if (appFila !== null) {
+                appFila.forEach((x, i) => {
+                    h += `<tr>
+                        <td class="vez-col">${i + 1}º</td>
+                        <td class="placa-col">${limpa(x.placa)}</td>
+                        <td style="font-size:10px; color:#8b949e">${cubMap[normPlaca(x.placa)] || '---'}</td>
+                    </tr>`;
+                });
+            } else {
+                // Fallback: fila da planilha, caso o Firestore esteja indisponível
+                sheetFila.forEach(x => {
+                    h += `<tr>
+                        <td class="vez-col">${x.vez}º</td>
+                        <td class="placa-col">${x.placa || '---'}</td>
+                        <td style="font-size:10px; color:#8b949e">${x.cub}</td>
+                    </tr>`;
+                });
+            }
+            document.getElementById('corpoFila').innerHTML = h || "<tr><td colspan='3'>PÁTIO VAZIO</td></tr>";
+        }
+
+        function iniciarFilaApp() {
+            firebase.firestore().collection("fila_patio").where("status", "==", "Aguardando")
+                .onSnapshot(snap => {
+                    appFila = snap.docs.map(d => d.data())
+                        .sort((a, b) => (a.timestampChegada || 0) - (b.timestampChegada || 0));
+                    renderFila();
+                    startAutoscroll();
+                }, err => {
+                    console.error("Fila do app indisponível:", err);
+                    appFila = null;
+                    renderFila();
+                });
+        }
+        firebase.initializeApp(firebaseConfig);
+        firebase.auth().signInAnonymously().catch(e => console.error(e)).finally(iniciarFilaApp);
 
         function updateClock() {
             const now = new Date();
@@ -200,7 +255,7 @@
                     updateRing('bMes', 'pMes', 'vMes', (vm/21000000)*100, d.faturamentoMes);
                 }
 
-                let hP = ""; let hF = "";
+                let hP = ""; sheetFila = []; cubMap = {};
 
                 if (d.veiculos) {
                     d.veiculos.forEach(v => {
@@ -226,18 +281,14 @@
                             </tr>`;
                         }
 
-                        if (vez && vez !== "0" && vez !== "VEZ") {
-                            hF += `<tr>
-                                <td class="vez-col">${vez}º</td>
-                                <td class="placa-col">${pPatio || '---'}</td>
-                                <td style="font-size:10px; color:#8b949e">${v.cubagem || v.CUBAGEM || '---'}</td>
-                            </tr>`;
-                        }
+                        const cub = v.cubagem || v.CUBAGEM || '---';
+                        if (pPatio) cubMap[normPlaca(pPatio)] = cub;
+                        if (vez && vez !== "0" && vez !== "VEZ") sheetFila.push({ vez, placa: pPatio, cub });
                     });
                 }
 
                 document.getElementById('corpoPedidos').innerHTML = hP || "<tr><td colspan='5'>SEM CARREGAMENTOS</td></tr>";
-                document.getElementById('corpoFila').innerHTML = hF || "<tr><td colspan='3'>PÁTIO VAZIO</td></tr>";
+                renderFila();
 
                 // Inicia a rolagem se houver muitos registros
                 startAutoscroll();
