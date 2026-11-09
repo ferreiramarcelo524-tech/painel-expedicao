@@ -240,7 +240,8 @@
 
                 if(d.faturamento) {
                     let v = parseFloat(d.faturamento.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
-                    updateRing('bDia', 'pDia', 'vDia', (v/954545)*100, d.faturamento);
+                    // VALOR DIÁRIO ALTERADO PARA 809524 (Compatível com 17M/mês em 21 dias úteis)
+                    updateRing('bDia', 'pDia', 'vDia', (v/809524)*100, d.faturamento);
 
                     const celebrationEl = document.getElementById('meta-celebration');
                     if (v >= 1000000) {
