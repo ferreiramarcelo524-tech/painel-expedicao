@@ -199,7 +199,8 @@
                 });
         }
         firebase.initializeApp(firebaseConfig);
-        firebase.auth().signInAnonymously().catch(e => console.error(e)).finally(iniciarFilaApp);
+        let __ini = false; const __go = () => { if (!__ini) { __ini = true; iniciarFilaApp(); } };
+        firebase.auth().onAuthStateChanged(u => { if (u) __go(); else firebase.auth().signInAnonymously().catch(e => console.error(e)).finally(__go); });
 
         function updateClock() {
             const now = new Date();
