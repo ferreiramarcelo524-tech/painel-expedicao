@@ -307,20 +307,40 @@ firebase.auth().onAuthStateChanged(function () {
   const iso = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   const BRL = v => (+v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const lum = c => { const n = parseInt(String(c).slice(1), 16) || 0; return ((n >> 16) * 299 + ((n >> 8 & 255) * 587) + (n & 255) * 114) / 1000 > 150 ? "#222" : "#fff"; };
+  const chave = f => normPlaca(f).replace(/^LOJA/, "");
+  const medida = document.createElement("canvas").getContext("2d");
   const diaAtual = iso(new Date());
-  let ativos = [], rDia = 0, rMes = 0, cores = {};
+  let ativos = [], rDia = 0, rMes = 0, cores = {}, emDoca = [];
+
+  // só placas ATIVAS (status "Em Doca"): as vinculadas à linha + as chamadas para a mesma filial
+  function placasAtivas(x) {
+    const ativas = new Set(emDoca.map(v => normPlaca(v.placa)));
+    const lista = String(x.veiculo || "").split(",").map(s => s.trim()).filter(p => p && ativas.has(normPlaca(p)));
+    emDoca.forEach(v => { if (x.filial && chave(v.filial) === chave(x.filial) && !lista.some(p => normPlaca(p) === normPlaca(v.placa))) lista.push(v.placa); });
+    return lista;
+  }
+
   function pintar() {
     const a = ativos.reduce((s, x) => s + (+x.valor || 0), 0), dia = rDia + a;
     updateRing("bDia", "pDia", "vDia", (dia / 809524) * 100, BRL(dia));
     updateRing("bMes", "pMes", "vMes", (rMes / 17000000) * 100, BRL(rMes));
     document.getElementById("meta-celebration").style.display = dia >= 1000000 ? "block" : "none";
-    document.getElementById("corpoPedidos").innerHTML = ativos.filter(x => x.doca).map(x => {
-      const s = String(x.tipo || "---").toUpperCase(), c = cores[s];
+    let maior = "";
+    const linhas = ativos.filter(x => x.doca).map(x => {
+      const s = String(x.tipo || "---").toUpperCase(), c = cores[s], pl = placasAtivas(x).map(limpa).join(", ");
+      if (pl.length > maior.length) maior = pl;
       return `<tr><td><span class="badge" style="background:${c || "#21262d"};color:${c ? lum(c) : "#fff"}">${limpa(s)}</span></td><td>${limpa(x.filial) || "-"}</td>
-        <td class="doca-col">${limpa(x.doca)}</td><td class="valor-col">${x.valor ? BRL(x.valor) : "sem pedido"}</td><td>${limpa(x.veiculo) || "---"}</td></tr>`;
-    }).join("") || "<tr><td colspan='5'>SEM CARREGAMENTOS</td></tr>";
+        <td class="doca-col">${limpa(x.doca)}</td><td class="valor-col">${x.valor ? BRL(x.valor) : "sem pedido"}</td><td>${pl || "---"}</td></tr>`;
+    });
+    document.getElementById("corpoPedidos").innerHTML = linhas.join("") || "<tr><td colspan='5'>SEM CARREGAMENTOS</td></tr>";
+    // coluna Veículo cresce conforme as placas (tira espaço da Filial); volta a 90px quando sobra só uma
+    const tabela = document.getElementById("corpoPedidos").closest("table"), cols = tabela.querySelectorAll("colgroup col");
+    medida.font = "800 12px Inter, sans-serif";
+    const w = maior ? Math.ceil(medida.measureText(maior).width) + 24 : 0;
+    cols[cols.length - 1].setAttribute("width", Math.max(90, Math.min(w, Math.floor(tabela.clientWidth * 0.55))));
   }
   db.collection("docas_carregamentos").onSnapshot(s => { ativos = s.docs.map(d => d.data()).sort((a, b) => (a.ordem || 0) - (b.ordem || 0)); pintar(); });
+  db.collection("fila_patio").where("status", "==", "Em Doca").onSnapshot(s => { emDoca = s.docs.map(d => d.data()).filter(v => v.placa); pintar(); });
   db.collection("docas_tipos").onSnapshot(s => { cores = {}; s.forEach(d => cores[String(d.data().nome).toUpperCase()] = d.data().cor); pintar(); });
   db.doc("docas_resumo/dia_" + diaAtual).onSnapshot(d => { rDia = d.exists ? d.data().total || 0 : 0; pintar(); });
   db.doc("docas_resumo/mes_" + diaAtual.slice(0, 7)).onSnapshot(d => { rMes = d.exists ? d.data().total || 0 : 0; pintar(); });
@@ -328,6 +348,7 @@ firebase.auth().onAuthStateChanged(function () {
     s.forEach(d => { const x = d.data(); cubMap[normPlaca(x.placa)] = String(x.cubagem).replace(".", ",") + "m³"; });
     renderFila();
   });
+  window.addEventListener("resize", pintar);
   setInterval(() => { if (iso(new Date()) !== diaAtual) location.reload(); }, 60000);
  })();
 });
