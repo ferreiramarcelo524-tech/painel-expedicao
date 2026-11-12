@@ -316,7 +316,7 @@ firebase.auth().onAuthStateChanged(function () {
   function placasAtivas(x) {
     const ativas = new Set(emDoca.map(v => normPlaca(v.placa)));
     const lista = String(x.veiculo || "").split(",").map(s => s.trim()).filter(p => p && ativas.has(normPlaca(p)));
-    emDoca.forEach(v => { if (x.filial && chave(v.filial) === chave(x.filial) && !lista.some(p => normPlaca(p) === normPlaca(v.placa))) lista.push(v.placa); });
+    emDoca.forEach(v => { if (x.filial && chave(v.filial) === chave(x.filial) && !(x.removidos || []).includes(v.placa) && !lista.some(p => normPlaca(p) === normPlaca(v.placa))) lista.push(v.placa); });
     return lista;
   }
 
