@@ -330,7 +330,7 @@ firebase.auth().onAuthStateChanged(function () {
       const s = String(x.tipo || "---").toUpperCase(), c = cores[s], pl = placasAtivas(x).map(limpa).join(", ");
       if (pl.length > maior.length) maior = pl;
       return `<tr><td><span class="badge" style="background:${c || "#21262d"};color:${c ? lum(c) : "#fff"}">${limpa(s)}</span></td><td>${limpa(x.filial) || "-"}</td>
-        <td class="doca-col">${limpa(x.doca)}</td><td class="valor-col">${x.valor ? BRL(x.valor) : "-----"}</td><td>${pl || "---"}</td></tr>`;
+        <td class="doca-col">${limpa(x.doca)}</td><td class="valor-col">${x.valor ? BRL(x.valor) : "sem pedido"}</td><td>${pl || "---"}</td></tr>`;
     });
     document.getElementById("corpoPedidos").innerHTML = linhas.join("") || "<tr><td colspan='5'>SEM CARREGAMENTOS</td></tr>";
     // coluna Veículo cresce conforme as placas (tira espaço da Filial); volta a 90px quando sobra só uma
